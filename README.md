@@ -2,7 +2,7 @@
 
 # 🛠️ Web Tools Pack
 
-### 35 free tools. One dashboard. Zero data collection.
+### 44 free tools. One dashboard. Zero data collection.
 
 Stop bouncing between 20 different websites — format, convert, encode, generate, and more, all from a single tab.
 
@@ -35,14 +35,14 @@ Everything runs **100% in your browser**. Your files and data never leave your m
 
 | | |
 |---|---|
-| 🧰 **35 tools** across 6 categories | 🛡️ **Privacy first** — nothing is uploaded, ever |
+| 🧰 **44 tools** across 6 categories | 🛡️ **Privacy first** — nothing is uploaded, ever |
 | 🌗 **Dark & light mode** with smooth transitions | ⌨️ **Command palette** — press `Ctrl+K` to jump anywhere |
 | 📱 **Responsive** — works on desktop, tablet, mobile | ⚡ **Fast** — static pages, code-split, tiny bundles |
 | 🖱️ **Drag & drop** everywhere — images, files, you name it | 📋 **Copy to clipboard** on every output |
 
 ---
 
-## 📦 All 35 Tools
+## 📦 All 44 Tools
 
 ### 🔧 Dev Tools
 
@@ -55,6 +55,10 @@ Everything runs **100% in your browser**. Your files and data never leave your m
 | **Regex Tester** | Test patterns, see matches & captured groups |
 | **Text Diff** | Side-by-side text comparison |
 | **Code Snippet Sharer** | Shareable code snippets via URL |
+| **Lorem Ipsum Generator** | Generate placeholder text for designs |
+| **Gradient Generator** | Create CSS gradients visually |
+| **CSS Shadow Generator** | Build box-shadows with a visual editor |
+| **Color Palette Generator** | Generate harmonious color palettes |
 
 ### 🔐 Encoding & Security
 
@@ -65,6 +69,7 @@ Everything runs **100% in your browser**. Your files and data never leave your m
 | **JWT Decoder** | Inspect JWT header & payload |
 | **Hash Generator** | SHA-256 · SHA-384 · SHA-512 · SHA-1 · MD5 |
 | **UUID Generator** | Bulk-generate v4 UUIDs |
+| **Password Generator** | Generate secure, customizable passwords |
 
 ### 📊 Data & Converters
 
@@ -102,6 +107,10 @@ Everything runs **100% in your browser**. Your files and data never leave your m
 | **Word Counter** | Words, chars, sentences, paragraphs, read time |
 | **Focus Editor** | Distraction-free fullscreen writing |
 | **Checklist Generator** | Create and manage task lists |
+| **Typing Speed Test** | Test your WPM with real-time stats |
+| **Stopwatch** | Precision stopwatch with lap times |
+| **Coin Flip & Dice** | Random decisions with animated coin & dice |
+| **AI Content Detector** | Detect AI-generated text patterns |
 
 ### 🎮 Valorant
 
@@ -141,11 +150,11 @@ src/
 │   ├── globals.css             # CSS variables, animations, global styles
 │   ├── donate/                 # Donation page
 │   └── tools/
-│       ├── dev/                # 7 developer tools
-│       ├── encoding/           # 5 encoding & security tools
+│       ├── dev/                # 11 developer tools
+│       ├── encoding/           # 6 encoding & security tools
 │       ├── data/               # 9 data & converter tools
 │       ├── media/              # 8 media & file tools
-│       ├── productivity/       # 5 productivity tools
+│       ├── productivity/       # 9 productivity tools
 │       └── valorant/           # 1 valorant tool
 ├── components/
 │   ├── ui/                     # shadcn/ui primitives
@@ -236,6 +245,6 @@ See [LICENSE](LICENSE) for the full terms.
 
 **Built with ❤️ by [xgoat-tbh](https://github.com/xgoat-tbh)**
 
-One dashboard. 35 tools. No BS.
+One dashboard. 44 tools. No BS.
 
 </div>

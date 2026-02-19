@@ -53,7 +53,6 @@ export default function DonatePage() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [qrReady, setQrReady] = useState(false)
   const [showHearts, setShowHearts] = useState(false)
-  const [copied, setCopied] = useState(false)
   const [hovered, setHovered] = useState(false)
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null)
 
@@ -81,14 +80,6 @@ export default function DonatePage() {
   useEffect(() => {
     generateQR()
   }, [])
-
-  const copyUPI = () => {
-    navigator.clipboard.writeText(UPI_ID)
-    setCopied(true)
-    setShowHearts(true)
-    setTimeout(() => setCopied(false), 2000)
-    setTimeout(() => setShowHearts(false), 1000)
-  }
 
   const amounts = [49, 99, 199, 499, 999]
 
@@ -168,19 +159,12 @@ export default function DonatePage() {
                 )}
               </div>
 
-              {/* UPI ID display */}
+              {/* UPI action */}
               <div className="relative mb-4">
                 <HeartBurst active={showHearts} />
-                <button
-                  onClick={copyUPI}
-                  className="group/upi inline-flex items-center gap-2 rounded-lg border border-border/80 bg-muted/50 px-4 py-2.5 text-sm font-mono transition-all hover:border-pink-500/40 hover:bg-pink-500/10"
-                >
-                  <span className="text-muted-foreground">UPI:</span>
-                  <span className="font-semibold text-foreground">{UPI_ID}</span>
-                  <span className={`ml-1 rounded px-1.5 py-0.5 text-[10px] font-sans transition-all ${copied ? "bg-green-500/20 text-green-400" : "bg-muted text-muted-foreground group-hover/upi:bg-pink-500/20 group-hover/upi:text-pink-400"}`}>
-                    {copied ? "Copied!" : "Copy"}
-                  </span>
-                </button>
+                <p className="text-sm text-muted-foreground">
+                  Scan the QR code with any UPI app to pay
+                </p>
               </div>
 
               <p className="text-xs text-muted-foreground">
@@ -216,11 +200,14 @@ export default function DonatePage() {
               ))}
 
               <button
-                onClick={copyUPI}
+                onClick={() => {
+                  setSelectedAmount(null)
+                  generateQR()
+                }}
                 className="animate-scale-in group relative overflow-hidden rounded-lg border border-dashed border-border/60 bg-card px-3 py-3 text-center transition-all duration-300 hover:-translate-y-0.5 hover:border-pink-500/40"
                 style={{ animationDelay: "0.9s" }}
               >
-                <span className="relative text-sm text-muted-foreground group-hover:text-pink-400">Custom</span>
+                <span className="relative text-sm text-muted-foreground group-hover:text-pink-400">Any Amount</span>
               </button>
             </div>
           </div>

@@ -4,14 +4,15 @@ import { useState } from "react"
 import { Sidebar } from "@/components/sidebar"
 import { CommandPalette } from "@/components/command-palette"
 import { ThemeProvider, useTheme } from "@/components/theme-provider"
-import { Menu, Search, Sun, Moon } from "lucide-react"
+import { Menu, Search, Sun, Moon, Heart } from "lucide-react"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 
 function Header({ onMenuClick }: { onMenuClick: () => void }) {
   const { theme, toggle } = useTheme()
 
   return (
-    <header className="sticky top-0 z-20 flex h-14 items-center gap-3 border-b bg-card/80 backdrop-blur px-4">
+    <header className="sticky top-0 z-20 flex h-14 items-center gap-3 border-b bg-card/80 backdrop-blur px-4 animate-fade-in-down">
       <Button variant="ghost" size="icon" className="lg:hidden" onClick={onMenuClick}>
         <Menu className="h-5 w-5" />
       </Button>
@@ -29,6 +30,13 @@ function Header({ onMenuClick }: { onMenuClick: () => void }) {
         <kbd className="ml-2 rounded border bg-muted px-1.5 py-0.5 text-[10px] font-mono">⌘K</kbd>
       </button>
 
+      <Link href="/donate">
+        <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground hover:text-pink-400 transition-colors">
+          <Heart className="h-3.5 w-3.5" />
+          <span className="hidden sm:inline text-xs">Donate</span>
+        </Button>
+      </Link>
+
       <Button variant="ghost" size="icon" onClick={toggle}>
         {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
       </Button>
@@ -45,7 +53,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
         <div className="flex flex-1 flex-col overflow-hidden">
           <Header onMenuClick={() => setSidebarOpen(true)} />
-          <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">{children}</main>
+          <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
+            <div className="animate-page-in">{children}</div>
+          </main>
         </div>
       </div>
       <CommandPalette />

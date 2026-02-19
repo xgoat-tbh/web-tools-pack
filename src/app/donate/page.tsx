@@ -54,27 +54,30 @@ export default function DonatePage() {
   const [showHearts, setShowHearts] = useState(false)
   const [copied, setCopied] = useState(false)
   const [hovered, setHovered] = useState(false)
+  const [selectedAmount, setSelectedAmount] = useState<number | null>(null)
 
   // Generate QR code
+  const generateQR = async (amount?: number) => {
+    const QRCode = (await import("qrcode")).default
+    const canvas = canvasRef.current
+    if (!canvas) return
+
+    let upiURL = `upi://pay?pa=${UPI_ID}&pn=WebToolsPack&cu=INR`
+    if (amount) upiURL += `&am=${amount}`
+
+    await QRCode.toCanvas(canvas, upiURL, {
+      width: 280,
+      margin: 2,
+      color: {
+        dark: "#ffffff",
+        light: "#00000000",
+      },
+      errorCorrectionLevel: "H",
+    })
+    setQrReady(true)
+  }
+
   useEffect(() => {
-    const generateQR = async () => {
-      const QRCode = (await import("qrcode")).default
-      const canvas = canvasRef.current
-      if (!canvas) return
-
-      const upiURL = `upi://pay?pa=${UPI_ID}&pn=WebToolsPack&cu=INR`
-
-      await QRCode.toCanvas(canvas, upiURL, {
-        width: 280,
-        margin: 2,
-        color: {
-          dark: "#ffffff",
-          light: "#00000000",
-        },
-        errorCorrectionLevel: "H",
-      })
-      setQrReady(true)
-    }
     generateQR()
   }, [])
 
@@ -89,7 +92,7 @@ export default function DonatePage() {
   const amounts = [49, 99, 199, 499, 999]
 
   return (
-    <div className="relative mx-auto max-w-4xl animate-page-in">
+    <div className="relative mx-auto max-w-4xl">
       <FloatingParticles />
 
       {/* Hero Section */}
@@ -139,6 +142,9 @@ export default function DonatePage() {
 
             <div className="relative text-center">
               <p className="mb-1 text-sm font-medium text-muted-foreground">Scan to Pay via UPI</p>
+              {selectedAmount && (
+                <p className="mb-1 text-xs font-semibold text-pink-400 animate-fade-in-up">Amount: ₹{selectedAmount}</p>
+              )}
               <div className="relative mx-auto mb-4 inline-block">
                 {/* QR glow ring */}
                 <div className={`absolute -inset-4 rounded-2xl bg-gradient-to-br from-pink-500/20 via-purple-500/20 to-cyan-500/20 blur-xl transition-opacity duration-700 ${hovered ? "opacity-100" : "opacity-0"}`} />
@@ -193,10 +199,14 @@ export default function DonatePage() {
                 <button
                   key={amt}
                   onClick={() => {
-                    // Open UPI intent with amount
-                    window.open(`upi://pay?pa=${UPI_ID}&pn=WebToolsPack&am=${amt}&cu=INR`, "_blank")
+                    setSelectedAmount(amt)
+                    generateQR(amt)
                   }}
-                  className="animate-scale-in group relative overflow-hidden rounded-lg border border-border/60 bg-card px-3 py-3 text-center transition-all duration-300 hover:-translate-y-0.5 hover:border-pink-500/40 hover:shadow-lg hover:shadow-pink-500/10"
+                  className={`animate-scale-in group relative overflow-hidden rounded-lg border px-3 py-3 text-center transition-all duration-300 hover:-translate-y-0.5 hover:border-pink-500/40 hover:shadow-lg hover:shadow-pink-500/10 ${
+                    selectedAmount === amt
+                      ? "border-pink-500/60 bg-pink-500/10 shadow-lg shadow-pink-500/10"
+                      : "border-border/60 bg-card"
+                  }`}
                   style={{ animationDelay: `${0.5 + i * 0.08}s` }}
                 >
                   <div className="absolute inset-0 bg-gradient-to-br from-pink-500/0 to-purple-500/0 transition-all duration-300 group-hover:from-pink-500/10 group-hover:to-purple-500/10" />

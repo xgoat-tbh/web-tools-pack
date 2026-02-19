@@ -24,7 +24,7 @@ export default function Home() {
   }, [query])
 
   return (
-    <div className="mx-auto max-w-5xl space-y-8 animate-page-in">
+    <div className="mx-auto max-w-5xl space-y-8">
       {/* Hero */}
       <div className="space-y-2">
         <div className="animate-fade-in-up flex items-center gap-2">
@@ -57,8 +57,8 @@ export default function Home() {
           style={{ animationDelay: `${0.2 + catIdx * 0.1}s` }}
         >
           <h2 className="mb-3 text-lg font-semibold">{cat.name}</h2>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 stagger-children">
-            {cat.tools.map((tool) => (
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {cat.tools.map((tool, toolIdx) => (
               <Link key={tool.slug} href={`/tools/${tool.category}/${tool.slug}`}>
                 <Card className="card-animated h-full group">
                   <CardHeader className="p-4">

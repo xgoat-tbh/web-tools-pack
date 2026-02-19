@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { Heart, Sparkles, Coffee, Star, Zap, Gift, Users, Crown, TrendingUp } from "lucide-react"
+import { Heart, Sparkles, Coffee, Star, Zap, Gift, Users, Crown, TrendingUp, Globe, ArrowRight, Github } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { donations } from "@/lib/donations"
@@ -220,9 +220,9 @@ export default function DonatePage() {
                 Why donate?
               </h3>
               {[
-                "Keep 31+ tools free forever",
+                "Keep 44+ tools free forever",
                 "Fund new tool development",
-                "Support open-source software",
+                "Support indie open-source software",
                 "Get a warm fuzzy feeling ❤️",
               ].map((perk, i) => (
                 <div
@@ -334,6 +334,123 @@ export default function DonatePage() {
             </div>
           </Card>
         )}
+      </div>
+
+      {/* International Supporters Section */}
+      <div className="mt-16">
+        <div className="animate-fade-in-up mb-6 text-center">
+          <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-cyan-500/20 bg-cyan-500/10 px-4 py-1.5 text-sm text-cyan-400">
+            <Globe className="h-3.5 w-3.5" />
+            International Supporters
+          </div>
+          <h2 className="text-2xl font-bold">Outside India?</h2>
+          <p className="mt-2 max-w-md mx-auto text-sm text-muted-foreground">
+            We currently only accept UPI (India). International payment methods will be enabled within the next few years as we grow — we promise it&apos;s on the roadmap!
+          </p>
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-3">
+          <Card className="animate-fade-in-up animation-delay-100 group border-border/50 bg-card/50 p-5 text-center transition-all duration-300 hover:border-cyan-500/30 hover:shadow-lg hover:shadow-cyan-500/5">
+            <Star className="mx-auto mb-2 h-6 w-6 text-yellow-500 transition-transform duration-300 group-hover:scale-110" />
+            <h3 className="font-semibold text-sm">Star on GitHub</h3>
+            <p className="mt-1 text-xs text-muted-foreground">Stars help us get discovered and motivate development.</p>
+            <a
+              href="https://github.com/xgoat-tbh/web-tools-pack"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-3 inline-flex items-center gap-1.5 rounded-md border border-border/60 bg-card px-3 py-1.5 text-xs font-medium transition-colors hover:border-yellow-500/40 hover:text-yellow-400"
+            >
+              <Github className="h-3.5 w-3.5" /> Star the Repo <ArrowRight className="h-3 w-3" />
+            </a>
+          </Card>
+
+          <Card className="animate-fade-in-up animation-delay-200 group border-border/50 bg-card/50 p-5 text-center transition-all duration-300 hover:border-cyan-500/30 hover:shadow-lg hover:shadow-cyan-500/5">
+            <Users className="mx-auto mb-2 h-6 w-6 text-blue-400 transition-transform duration-300 group-hover:scale-110" />
+            <h3 className="font-semibold text-sm">Share with Friends</h3>
+            <p className="mt-1 text-xs text-muted-foreground">Tell a friend, tweet about it, or post in a community. Word of mouth is huge!</p>
+            <button
+              onClick={() => {
+                if (navigator.share) {
+                  navigator.share({ title: "Web Tools Pack", text: "44+ free browser tools — no sign-up, no tracking!", url: "https://web-tools-pack.vercel.app" })
+                } else {
+                  navigator.clipboard.writeText("https://web-tools-pack.vercel.app")
+                }
+              }}
+              className="mt-3 inline-flex items-center gap-1.5 rounded-md border border-border/60 bg-card px-3 py-1.5 text-xs font-medium transition-colors hover:border-blue-500/40 hover:text-blue-400"
+            >
+              Share <ArrowRight className="h-3 w-3" />
+            </button>
+          </Card>
+
+          <Card className="animate-fade-in-up animation-delay-300 group border-border/50 bg-card/50 p-5 text-center transition-all duration-300 hover:border-cyan-500/30 hover:shadow-lg hover:shadow-cyan-500/5">
+            <Zap className="mx-auto mb-2 h-6 w-6 text-orange-400 transition-transform duration-300 group-hover:scale-110" />
+            <h3 className="font-semibold text-sm">Contribute Code</h3>
+            <p className="mt-1 text-xs text-muted-foreground">Found a bug? Have a tool idea? PRs and issues are always welcome.</p>
+            <a
+              href="https://github.com/xgoat-tbh/web-tools-pack/issues"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-3 inline-flex items-center gap-1.5 rounded-md border border-border/60 bg-card px-3 py-1.5 text-xs font-medium transition-colors hover:border-orange-500/40 hover:text-orange-400"
+            >
+              Open an Issue <ArrowRight className="h-3 w-3" />
+            </a>
+          </Card>
+        </div>
+
+        <div className="mt-4 rounded-lg border border-cyan-500/10 bg-cyan-500/5 p-3 text-center">
+          <p className="text-xs text-muted-foreground">
+            🌍 International donations (card, PayPal) will be enabled within the next few years. Stay tuned!
+          </p>
+        </div>
+      </div>
+
+      {/* Upcoming Tools — what your support funds */}
+      <div className="mt-16 mb-8">
+        <div className="animate-fade-in-up mb-6 text-center">
+          <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-green-500/20 bg-green-500/10 px-4 py-1.5 text-sm text-green-400">
+            <Zap className="h-3.5 w-3.5" />
+            On the Roadmap
+          </div>
+          <h2 className="text-2xl font-bold">Tools We&apos;re Building Next</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Your support helps us build these — tools for everyone, everywhere.
+          </p>
+        </div>
+
+        <div className="grid gap-2 sm:grid-cols-2">
+          {[
+            { emoji: "📝", name: "Resume Builder", desc: "Create professional resumes with templates — export to PDF" },
+            { emoji: "🧮", name: "Invoice Generator", desc: "Generate invoices with logo, tax, and download as PDF" },
+            { emoji: "🔤", name: "Font Previewer", desc: "Preview Google Fonts side-by-side with custom text" },
+            { emoji: "📊", name: "JSON to CSV/Excel", desc: "Instantly convert JSON data to spreadsheet formats" },
+            { emoji: "🎨", name: "SVG Editor", desc: "Create & edit SVGs visually in the browser" },
+            { emoji: "🔗", name: "Link Shortener", desc: "Shorten URLs with QR codes and click tracking" },
+            { emoji: "🌐", name: "DNS Lookup", desc: "Look up DNS records for any domain" },
+            { emoji: "📸", name: "Screenshot to Code", desc: "Paste a screenshot, get HTML/CSS skeleton" },
+            { emoji: "🗣️", name: "Text to Speech", desc: "Convert text to audio with multiple voices" },
+            { emoji: "📅", name: "Cron Expression Builder", desc: "Build cron schedules with a visual editor" },
+            { emoji: "🔒", name: "SSL Certificate Checker", desc: "Check SSL cert expiry and details for any site" },
+            { emoji: "🖼️", name: "Favicon Generator", desc: "Generate favicons in all sizes from a single image" },
+          ].map((tool, i) => (
+            <div
+              key={i}
+              className="animate-fade-in-up flex items-start gap-3 rounded-lg border border-border/40 bg-card/30 p-3 transition-colors hover:border-green-500/20 hover:bg-green-500/5"
+              style={{ animationDelay: `${0.1 + i * 0.05}s` }}
+            >
+              <span className="text-xl shrink-0">{tool.emoji}</span>
+              <div>
+                <h4 className="text-sm font-semibold">{tool.name}</h4>
+                <p className="text-xs text-muted-foreground">{tool.desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-4 text-center">
+          <p className="text-xs text-muted-foreground">
+            Have a tool idea? <a href="https://github.com/xgoat-tbh/web-tools-pack/issues" target="_blank" rel="noopener noreferrer" className="text-primary underline underline-offset-2 hover:text-pink-400">Open an issue on GitHub</a> and we&apos;ll consider it!
+          </p>
+        </div>
       </div>
     </div>
   )

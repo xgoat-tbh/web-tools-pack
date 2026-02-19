@@ -202,3 +202,38 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ── Security protection styles ── */
+body.protected {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Allow selection inside inputs, textareas, pre, code, and elements with .selectable */
+body.protected input,
+body.protected textarea,
+body.protected pre,
+body.protected code,
+body.protected [contenteditable="true"],
+body.protected .selectable {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* DevTools open overlay */
+html.devtools-open body::after {
+  content: "⛔ DevTools detected — this site is protected.";
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.92);
+  color: #ff4444;
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-align: center;
+  pointer-events: all;
+  backdrop-filter: blur(8px);
+}

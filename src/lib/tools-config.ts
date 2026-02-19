@@ -6,6 +6,7 @@ import {
   Timer, StickyNote, Type, PenTool, CheckSquare,
   Swords,
   Laugh, Terminal, DollarSign, Ruler,
+  Paintbrush, Square, Keyboard, Coins,
 } from "lucide-react"
 
 export interface Tool {
@@ -34,6 +35,10 @@ export const categories: Category[] = [
       { name: "Regex Tester", slug: "regex-tester", description: "Test regular expressions", icon: Regex, category: "dev" },
       { name: "Text Diff", slug: "text-diff", description: "Compare two texts", icon: GitCompare, category: "dev" },
       { name: "Code Snippet Sharer", slug: "code-snippet", description: "Share code snippets", icon: Share2, category: "dev" },
+      { name: "Lorem Ipsum Generator", slug: "lorem-ipsum", description: "Generate placeholder text", icon: FileText, category: "dev" },
+      { name: "Gradient Generator", slug: "gradient-generator", description: "Create CSS gradients visually", icon: Paintbrush, category: "dev" },
+      { name: "CSS Shadow Generator", slug: "shadow-generator", description: "Build box-shadows visually", icon: Square, category: "dev" },
+      { name: "Color Palette Generator", slug: "color-palette", description: "Generate harmonious palettes", icon: Palette, category: "dev" },
     ],
   },
   {
@@ -45,6 +50,7 @@ export const categories: Category[] = [
       { name: "JWT Decoder", slug: "jwt-decoder", description: "Decode JSON Web Tokens", icon: Key, category: "encoding" },
       { name: "Hash Generator", slug: "hash-generator", description: "Generate SHA256, MD5 hashes", icon: Hash, category: "encoding" },
       { name: "UUID Generator", slug: "uuid-generator", description: "Generate UUIDs", icon: Fingerprint, category: "encoding" },
+      { name: "Password Generator", slug: "password-generator", description: "Generate secure passwords", icon: Lock, category: "encoding" },
     ],
   },
   {
@@ -85,6 +91,9 @@ export const categories: Category[] = [
       { name: "Word Counter", slug: "word-counter", description: "Count words, chars, sentences", icon: Type, category: "productivity" },
       { name: "Focus Editor", slug: "focus-editor", description: "Distraction-free text editor", icon: PenTool, category: "productivity" },
       { name: "Checklist Generator", slug: "checklist", description: "Create and manage checklists", icon: CheckSquare, category: "productivity" },
+      { name: "Typing Speed Test", slug: "typing-test", description: "Test your typing speed", icon: Keyboard, category: "productivity" },
+      { name: "Stopwatch", slug: "stopwatch", description: "Precision stopwatch with laps", icon: Timer, category: "productivity" },
+      { name: "Coin Flip & Dice", slug: "coin-dice", description: "Random decisions with style", icon: Coins, category: "productivity" },
     ],
   },
   {

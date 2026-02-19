@@ -1,16 +1,27 @@
-MIT License
+Source-Available License
 
-Copyright (c) 2026
+Copyright (c) 2026 xgoat-tbh
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+of this software and associated documentation files (the "Software"), to use
+the Software subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+PERMITTED:
+  - Using the hosted version at web-tools-pack.vercel.app
+  - Cloning and running locally for personal, non-commercial use
+  - Studying, modifying, and learning from the source code
+  - Contributing improvements back to the original repository
+    via pull requests
+
+NOT PERMITTED:
+  - Deploying, hosting, publishing, or making publicly available any copy
+    of this Software (modified or unmodified) on any server, platform,
+    or hosting service
+  - Redistributing the Software (in whole or in part) as a standalone
+    product, service, or package
+  - Using the Software (in whole or in part) for commercial purposes
+    without prior written permission from the copyright holder
+  - Removing or altering this license notice from any copy of the Software
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,

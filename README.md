@@ -2,203 +2,197 @@
 
 # 🛠️ Web Tools Pack
 
-**A modern, all-in-one developer toolkit — 31 tools across 6 categories.**
+### 35 free tools. One dashboard. Zero data collection.
 
-Built with Next.js 14 · TypeScript · Tailwind CSS · shadcn/ui
+Stop bouncing between 20 different websites — format, convert, encode, generate, and more, all from a single tab.
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/xgoat-tbh/web-tools-pack)
+<br/>
+
+**[🌐 Use it now → web-tools-pack.vercel.app](https://web-tools-pack.vercel.app)**
+
+<br/>
+
 [![Next.js](https://img.shields.io/badge/Next.js-14-black?logo=next.js)](https://nextjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)](https://typescriptlang.org)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-38bdf8?logo=tailwind-css)](https://tailwindcss.com)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![License](https://img.shields.io/badge/License-Source_Available-orange.svg)](LICENSE)
 
 </div>
 
----
-
-## ✨ Features
-
-- **31 tools** in one unified dashboard — no context switching
-- **Dark mode by default** with light mode toggle
-- **Command palette** (`Ctrl+K`) for instant tool search
-- **Fully responsive** — desktop-first, mobile-optimized
-- **100% client-side** — no data leaves your browser
-- **Drag & drop** file uploads with image preview
-- **Copy to clipboard** on all outputs
-- **Zero config deploy** to Vercel
-- **Fast** — static generation, minimal JS bundles
+> **⚠️ Not for redeployment.** This project is source-available for learning, contribution, and personal use — **not** for hosting your own copy. See [License](#-license) for details.
 
 ---
 
-## 📦 Tools (31)
+## 🖥️ Try It
 
-### 🔧 Dev Tools (7)
+Head over to **[web-tools-pack.vercel.app](https://web-tools-pack.vercel.app)** — no sign-up, no tracking, works on any device.
 
-| Tool | Description |
+Everything runs **100% in your browser**. Your files and data never leave your machine.
+
+---
+
+## ✨ Highlights
+
+| | |
+|---|---|
+| 🧰 **35 tools** across 6 categories | 🛡️ **Privacy first** — nothing is uploaded, ever |
+| 🌗 **Dark & light mode** with smooth transitions | ⌨️ **Command palette** — press `Ctrl+K` to jump anywhere |
+| 📱 **Responsive** — works on desktop, tablet, mobile | ⚡ **Fast** — static pages, code-split, tiny bundles |
+| 🖱️ **Drag & drop** everywhere — images, files, you name it | 📋 **Copy to clipboard** on every output |
+
+---
+
+## 📦 All 35 Tools
+
+### 🔧 Dev Tools
+
+| Tool | What it does |
 |------|-------------|
 | **JSON Formatter** | Format, validate, and minify JSON |
-| **XML Formatter** | Pretty-print or minify XML documents |
-| **Minifier / Beautifier** | Minify or beautify HTML, CSS, and JavaScript |
-| **Markdown Editor** | Write Markdown with real-time GFM preview |
-| **Regex Tester** | Test patterns with match highlighting and group capture |
-| **Text Diff** | Side-by-side comparison with line-level diff |
-| **Code Snippet Sharer** | Generate shareable code snippets via URL |
+| **XML Formatter** | Pretty-print or minify XML |
+| **Minifier / Beautifier** | Minify or beautify HTML, CSS, JS |
+| **Markdown Editor** | Write Markdown with real-time preview (GFM) |
+| **Regex Tester** | Test patterns, see matches & captured groups |
+| **Text Diff** | Side-by-side text comparison |
+| **Code Snippet Sharer** | Shareable code snippets via URL |
 
-### 🔐 Encoding & Security (5)
+### 🔐 Encoding & Security
 
-| Tool | Description |
+| Tool | What it does |
 |------|-------------|
-| **Base64 Encode/Decode** | Convert text ↔ Base64 |
-| **URL Encoder/Decoder** | Encode or decode URI components |
-| **JWT Decoder** | Inspect JWT header and payload |
-| **Hash Generator** | SHA-256, SHA-384, SHA-512, SHA-1, MD5 |
-| **UUID Generator** | Bulk generate v4 UUIDs |
+| **Base64 Encode/Decode** | Text ↔ Base64 |
+| **URL Encoder/Decoder** | Encode / decode URI components |
+| **JWT Decoder** | Inspect JWT header & payload |
+| **Hash Generator** | SHA-256 · SHA-384 · SHA-512 · SHA-1 · MD5 |
+| **UUID Generator** | Bulk-generate v4 UUIDs |
 
-### 📊 Data & Converters (7)
+### 📊 Data & Converters
 
-| Tool | Description |
+| Tool | What it does |
 |------|-------------|
-| **Number Base Converter** | Binary ↔ Decimal ↔ Hex ↔ Octal |
+| **Number Base Converter** | Bin ↔ Dec ↔ Hex ↔ Oct |
 | **Percentage Calculator** | Three-mode percentage solver |
-| **Random Number Generator** | Configurable range and batch generation |
+| **Random Number Generator** | Custom range & batch generation |
 | **Timestamp Converter** | Unix ↔ ISO 8601 ↔ human-readable |
-| **Timezone Converter** | View a time across 17 global timezones |
-| **Date Difference** | Exact difference in years, months, days, hours |
-| **Age Calculator** | Precise age + days until next birthday |
+| **Timezone Converter** | See any time across 17 timezones |
+| **Date Difference** | Years, months, days, hours between dates |
+| **Age Calculator** | Exact age + days until birthday |
+| **Currency Converter** | 20 currencies with live exchange rates |
+| **Unit Converter** | Length, weight, temp, speed, area, volume, data, time |
 
-### 🖼️ Media & Files (6)
+### 🖼️ Media & Files
 
-| Tool | Description |
+| Tool | What it does |
 |------|-------------|
-| **Image Compressor** | JPEG compression with quality slider and size stats |
+| **Image Compressor** | Compress with quality slider & size stats |
 | **Image Resizer** | Resize with aspect ratio lock |
-| **Image Converter** | Convert between PNG, JPEG, and WebP |
+| **Image Converter** | PNG ↔ JPEG ↔ WebP |
 | **Color Picker** | Extract colors from any image pixel |
-| **Blur / Pixelate** | Apply blur or mosaic effects to images |
-| **QR Code Generator** | Generate downloadable QR codes from text/URLs |
+| **Blur / Pixelate** | Apply blur or mosaic effects |
+| **QR Code Generator** | Downloadable QR codes from text/URLs |
+| **Meme Generator** | Drop an image, add top/bottom text, done |
+| **ASCII Art Generator** | Image → ASCII or Text → ASCII art |
 
-### ⏱️ Productivity (5)
+### ⏱️ Productivity
 
-| Tool | Description |
+| Tool | What it does |
 |------|-------------|
-| **Pomodoro Timer** | Focus timer with work/break intervals and audio alert |
-| **Sticky Notes** | Persistent notes with localStorage autosave |
-| **Word Counter** | Words, characters, sentences, paragraphs, reading time |
-| **Focus Editor** | Distraction-free fullscreen writing environment |
-| **Checklist Generator** | Create and manage task checklists |
+| **Pomodoro Timer** | Focus/break intervals with audio alert |
+| **Sticky Notes** | Persistent notes (auto-saves locally) |
+| **Word Counter** | Words, chars, sentences, paragraphs, read time |
+| **Focus Editor** | Distraction-free fullscreen writing |
+| **Checklist Generator** | Create and manage task lists |
 
-### 🎮 Valorant (1)
+### 🎮 Valorant
 
-| Tool | Description |
+| Tool | What it does |
 |------|-------------|
-| **Team Comp Suggester** | Balanced 5-agent compositions for every map with role analysis |
+| **Team Comp Suggester** | Balanced 5-agent comps for every map |
 
 ---
 
-## 🚀 Getting Started
+## 🧑‍💻 For Developers
+
+Want to understand the code, fix a bug, or contribute a feature? Here's how to run it locally.
 
 ### Prerequisites
 
-- **Node.js** 18+ 
+- **Node.js** 18+
 - **npm** 9+
 
-### Installation
+### Run Locally
 
 ```bash
-# Clone the repository
 git clone https://github.com/xgoat-tbh/web-tools-pack.git
 cd web-tools-pack
-
-# Install dependencies
 npm install
-
-# Start development server
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+Open [localhost:3000](http://localhost:3000) and you're in.
 
-### Build for Production
-
-```bash
-npm run build
-npm start
-```
-
----
-
-## 🌐 Deploy to Vercel
-
-The fastest way to deploy:
-
-1. Push this repo to GitHub
-2. Go to [vercel.com/new](https://vercel.com/new)
-3. Import the repository
-4. Click **Deploy** — no configuration needed
-
-Or use the Vercel CLI:
-
-```bash
-npx vercel
-```
-
----
-
-## 🏗️ Project Structure
+### Project Structure
 
 ```
 src/
 ├── app/
-│   ├── layout.tsx              # Root layout with AppShell
-│   ├── page.tsx                # Homepage dashboard
-│   ├── globals.css             # Theme variables & global styles
+│   ├── layout.tsx              # Root layout (AppShell wrapper)
+│   ├── page.tsx                # Homepage — tool grid
+│   ├── globals.css             # CSS variables, animations, global styles
+│   ├── donate/                 # Donation page
 │   └── tools/
-│       ├── dev/                # Developer tools
-│       ├── encoding/           # Encoding & security tools
-│       ├── data/               # Data & converter tools
-│       ├── media/              # Media & file tools
-│       ├── productivity/       # Productivity tools
-│       └── valorant/           # Valorant tools
+│       ├── dev/                # 7 developer tools
+│       ├── encoding/           # 5 encoding & security tools
+│       ├── data/               # 9 data & converter tools
+│       ├── media/              # 8 media & file tools
+│       ├── productivity/       # 5 productivity tools
+│       └── valorant/           # 1 valorant tool
 ├── components/
-│   ├── ui/                     # shadcn/ui primitives (Button, Card, Input, etc.)
-│   ├── app-shell.tsx           # Main layout shell (sidebar + header)
-│   ├── sidebar.tsx             # Categorized navigation sidebar
-│   ├── command-palette.tsx     # Ctrl+K command palette
-│   ├── theme-provider.tsx      # Dark/light mode provider
-│   ├── copy-button.tsx         # Reusable copy-to-clipboard button
-│   └── file-dropzone.tsx       # Drag-and-drop file upload component
+│   ├── ui/                     # shadcn/ui primitives
+│   ├── app-shell.tsx           # Sidebar + header layout
+│   ├── sidebar.tsx             # Navigation sidebar
+│   ├── command-palette.tsx     # Ctrl+K search
+│   ├── theme-provider.tsx      # Dark/light theme with fade transition
+│   ├── copy-button.tsx         # Copy-to-clipboard button
+│   └── file-dropzone.tsx       # Drag-and-drop upload component
 ├── hooks/
 │   └── use-copy.ts             # Clipboard hook
 └── lib/
-    ├── utils.ts                # cn() utility
-    ├── tools-config.ts         # Tool registry & navigation config
-    └── valorant-data.ts        # Agent & map composition data
+    ├── utils.ts                # cn() class merge utility
+    ├── tools-config.ts         # Central tool registry (add new tools here)
+    └── valorant-data.ts        # Agent & map data
 ```
 
+### Adding a New Tool
+
+1. Pick a category from `src/lib/tools-config.ts` (or create one)
+2. Add an entry with `name`, `slug`, `description`, `icon`, and `category`
+3. Create the page at `src/app/tools/<category>/<slug>/page.tsx`
+4. Use `"use client"` — all tools are client-side components
+5. That's it. The sidebar, homepage, and command palette update automatically.
+
+### Tech Stack
+
+| | |
+|---|---|
+| **Next.js 14** | App Router, static generation |
+| **TypeScript 5** | Type safety throughout |
+| **Tailwind CSS 3.4** | Styling + custom animations |
+| **shadcn/ui + Radix UI** | Accessible component primitives |
+| **Lucide React** | Icon library |
+
 ---
 
-## 🛠️ Tech Stack
+## 🤝 Contributing
 
-| Technology | Purpose |
-|------------|---------|
-| [Next.js 14](https://nextjs.org) | App Router, SSG, file-based routing |
-| [TypeScript](https://typescriptlang.org) | Type safety |
-| [Tailwind CSS](https://tailwindcss.com) | Utility-first styling |
-| [shadcn/ui](https://ui.shadcn.com) | Accessible component primitives |
-| [Radix UI](https://radix-ui.com) | Headless UI primitives |
-| [Lucide React](https://lucide.dev) | Icon library |
-| [react-markdown](https://github.com/remarkjs/react-markdown) | Markdown rendering |
-| [qrcode](https://github.com/soldair/node-qrcode) | QR code generation |
+Contributions are welcome! Whether it's a new tool, bug fix, or UI improvement:
 
----
+1. Fork the repo
+2. Create a branch (`git checkout -b feat/my-tool`)
+3. Make your changes
+4. Open a pull request
 
-## 📐 Design Principles
-
-- **Privacy first** — all processing happens in-browser, nothing is uploaded
-- **Performance** — static pages, code-split per tool, minimal bundle sizes
-- **Accessibility** — semantic HTML, keyboard navigation, focus management
-- **Modularity** — each tool is a self-contained page component
-- **Minimal dependencies** — only what's necessary, no bloat
+Please keep PRs focused and follow the existing code style.
 
 ---
 
@@ -207,18 +201,41 @@ src/
 | Shortcut | Action |
 |----------|--------|
 | `Ctrl + K` | Open command palette |
-| `Escape` | Close command palette / modals |
+| `Escape` | Close palette / modals |
+
+---
+
+## 💖 Support
+
+If you find this useful, consider supporting the project:
+
+**[Donate → web-tools-pack.vercel.app/donate](https://web-tools-pack.vercel.app/donate)**
 
 ---
 
 ## 📄 License
 
-This project is open source under the [MIT License](LICENSE).
+This project is **source-available** — not open source.
+
+You **can**:
+- ✅ Use the live site freely at [web-tools-pack.vercel.app](https://web-tools-pack.vercel.app)
+- ✅ Clone and run locally for personal use or learning
+- ✅ Contribute to this repository via pull requests
+- ✅ Reference the code for educational purposes
+
+You **cannot**:
+- ❌ Deploy, host, or publish your own copy of this project
+- ❌ Redistribute this project (modified or unmodified) as your own
+- ❌ Use this project for commercial purposes without permission
+
+See [LICENSE](LICENSE) for the full terms.
 
 ---
 
 <div align="center">
 
-**Built with ❤️ for developers who hate switching between 20 different websites.**
+**Built with ❤️ by [xgoat-tbh](https://github.com/xgoat-tbh)**
+
+One dashboard. 35 tools. No BS.
 
 </div>

@@ -8,8 +8,20 @@ import { Menu, Search, Sun, Moon, Heart } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 
+function ThemeTransitionWrapper({ children }: { children: React.ReactNode }) {
+  const { transitioning } = useTheme()
+  return (
+    <div
+      className="transition-opacity duration-200 ease-in-out"
+      style={{ opacity: transitioning ? 0 : 1 }}
+    >
+      {children}
+    </div>
+  )
+}
+
 function Header({ onMenuClick }: { onMenuClick: () => void }) {
-  const { theme, toggle } = useTheme()
+  const { theme, toggle, transitioning } = useTheme()
 
   return (
     <header className="sticky top-0 z-20 flex h-14 items-center gap-3 border-b bg-card/80 backdrop-blur px-4 animate-fade-in-down">
@@ -37,8 +49,9 @@ function Header({ onMenuClick }: { onMenuClick: () => void }) {
         </Button>
       </Link>
 
-      <Button variant="ghost" size="icon" onClick={toggle}>
-        {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+      <Button variant="ghost" size="icon" onClick={toggle} className="relative h-9 w-9 overflow-hidden">
+        <Sun className={`h-4 w-4 absolute transition-all duration-300 ${theme === "dark" ? "rotate-0 scale-100 opacity-100" : "rotate-90 scale-0 opacity-0"}`} />
+        <Moon className={`h-4 w-4 absolute transition-all duration-300 ${theme === "light" ? "rotate-0 scale-100 opacity-100" : "-rotate-90 scale-0 opacity-0"}`} />
       </Button>
     </header>
   )
@@ -49,6 +62,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <ThemeProvider>
+      <ThemeTransitionWrapper>
       <div className="flex h-screen overflow-hidden">
         <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
         <div className="flex flex-1 flex-col overflow-hidden">
@@ -59,6 +73,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       </div>
       <CommandPalette />
+      </ThemeTransitionWrapper>
     </ThemeProvider>
   )
 }

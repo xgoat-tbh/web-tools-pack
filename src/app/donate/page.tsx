@@ -1,9 +1,10 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { Heart, Sparkles, Coffee, Star, Zap, Gift } from "lucide-react"
+import { Heart, Sparkles, Coffee, Star, Zap, Gift, Users, Crown, TrendingUp } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { donations } from "@/lib/donations"
 
 const UPI_ID = "namanbruh@fam"
 
@@ -257,6 +258,95 @@ export default function DonatePage() {
             <p className="mt-1 text-lg">🙏</p>
           </div>
         </div>
+      </div>
+
+      {/* Donation History / Wall of Love */}
+      <div className="mt-16">
+        <div className="animate-fade-in-up mb-6 text-center">
+          <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-purple-500/20 bg-purple-500/10 px-4 py-1.5 text-sm text-purple-400">
+            <Users className="h-3.5 w-3.5" />
+            Wall of Love
+          </div>
+          <h2 className="text-2xl font-bold">Our Supporters</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {donations.length > 0
+              ? `${donations.length} amazing ${donations.length === 1 ? "person has" : "people have"} supported this project`
+              : "Be the first to support this project!"}
+          </p>
+        </div>
+
+        {donations.length > 0 ? (
+          <>
+            {/* Stats bar */}
+            <div className="animate-fade-in-up animation-delay-100 mb-6 grid grid-cols-3 gap-3">
+              <Card className="border-border/50 bg-card/50 p-4 text-center backdrop-blur">
+                <TrendingUp className="mx-auto mb-1 h-4 w-4 text-green-400" />
+                <p className="text-xl font-bold">₹{donations.reduce((s, d) => s + d.amount, 0).toLocaleString("en-IN")}</p>
+                <p className="text-[10px] text-muted-foreground">Total Raised</p>
+              </Card>
+              <Card className="border-border/50 bg-card/50 p-4 text-center backdrop-blur">
+                <Heart className="mx-auto mb-1 h-4 w-4 text-pink-400" />
+                <p className="text-xl font-bold">{donations.length}</p>
+                <p className="text-[10px] text-muted-foreground">Donations</p>
+              </Card>
+              <Card className="border-border/50 bg-card/50 p-4 text-center backdrop-blur">
+                <Crown className="mx-auto mb-1 h-4 w-4 text-yellow-400" />
+                <p className="text-xl font-bold">₹{Math.max(...donations.map(d => d.amount)).toLocaleString("en-IN")}</p>
+                <p className="text-[10px] text-muted-foreground">Top Donation</p>
+              </Card>
+            </div>
+
+            {/* Donation list */}
+            <div className="space-y-2">
+              {donations.map((d, i) => (
+                <Card
+                  key={i}
+                  className="animate-fade-in-up group border-border/50 bg-card/50 transition-all duration-300 hover:border-pink-500/30 hover:shadow-lg hover:shadow-pink-500/5"
+                  style={{ animationDelay: `${0.15 + i * 0.06}s` }}
+                >
+                  <div className="flex items-center gap-4 p-4">
+                    {/* Avatar */}
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-pink-500 to-purple-500 text-sm font-bold text-white">
+                      {d.name.charAt(0).toUpperCase()}
+                    </div>
+
+                    {/* Info */}
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold">{d.name}</span>
+                        {d.amount >= 499 && <Crown className="h-3.5 w-3.5 text-yellow-500" />}
+                      </div>
+                      {d.message && (
+                        <p className="truncate text-sm text-muted-foreground">"{d.message}"</p>
+                      )}
+                    </div>
+
+                    {/* Amount & date */}
+                    <div className="shrink-0 text-right">
+                      <p className="font-bold text-green-400">₹{d.amount}</p>
+                      <p className="text-[10px] text-muted-foreground">
+                        {new Date(d.date).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                      </p>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </>
+        ) : (
+          /* Empty state */
+          <Card className="animate-fade-in-up animation-delay-200 border-dashed border-border/60 bg-card/30">
+            <div className="flex flex-col items-center justify-center p-12 text-center">
+              <div className="mb-4 rounded-full bg-pink-500/10 p-4">
+                <Heart className="h-8 w-8 text-pink-500/60" />
+              </div>
+              <h3 className="text-lg font-semibold">No donations yet</h3>
+              <p className="mt-1 max-w-xs text-sm text-muted-foreground">
+                Be the first to support Web Tools Pack! Scan the QR code above or copy the UPI ID.
+              </p>
+            </div>
+          </Card>
+        )}
       </div>
     </div>
   )

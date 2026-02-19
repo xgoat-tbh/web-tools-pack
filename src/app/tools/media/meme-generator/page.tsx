@@ -108,40 +108,43 @@ export default function MemeGeneratorPage() {
       </div>
       <p className="text-muted-foreground">Upload an image and add top/bottom text to create memes.</p>
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
-        {/* Canvas / Upload */}
+      {!image ? (
         <Card>
           <CardContent className="p-4">
-            {!image ? (
-              <div
-                onDragOver={(e) => { e.preventDefault(); setDragging(true) }}
-                onDragLeave={() => setDragging(false)}
-                onDrop={handleDrop}
-                onClick={() => fileRef.current?.click()}
-                className={`flex h-80 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed transition-colors ${
-                  dragging ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
-                }`}
-              >
-                <Upload className="mb-2 h-10 w-10 text-muted-foreground" />
-                <p className="text-sm text-muted-foreground">Drop image here or click to upload</p>
-                <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={(e) => {
-                  const f = e.target.files?.[0]
-                  if (f) handleFile(f)
-                }} />
+            <div
+              onDragOver={(e) => { e.preventDefault(); setDragging(true) }}
+              onDragLeave={() => setDragging(false)}
+              onDrop={handleDrop}
+              onClick={() => fileRef.current?.click()}
+              className={`flex h-56 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed transition-colors ${
+                dragging ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
+              }`}
+            >
+              <Upload className="mb-2 h-10 w-10 text-muted-foreground" />
+              <p className="text-sm text-muted-foreground">Drop image here or click to upload</p>
+              <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={(e) => {
+                const f = e.target.files?.[0]
+                if (f) handleFile(f)
+              }} />
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
+      <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
+        {/* Canvas */}
+        <Card>
+          <CardContent className="p-4">
+            <div className="space-y-3">
+              <canvas ref={canvasRef} className="mx-auto block max-w-full rounded-lg" />
+              <div className="flex gap-2">
+                <Button onClick={download} className="flex-1 gap-2">
+                  <Download className="h-4 w-4" /> Download Meme
+                </Button>
+                <Button variant="outline" onClick={reset}>
+                  <RotateCcw className="h-4 w-4" />
+                </Button>
               </div>
-            ) : (
-              <div className="space-y-3">
-                <canvas ref={canvasRef} className="mx-auto block max-w-full rounded-lg" />
-                <div className="flex gap-2">
-                  <Button onClick={download} className="flex-1 gap-2">
-                    <Download className="h-4 w-4" /> Download Meme
-                  </Button>
-                  <Button variant="outline" onClick={reset}>
-                    <RotateCcw className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            )}
+            </div>
           </CardContent>
         </Card>
 
@@ -230,6 +233,7 @@ export default function MemeGeneratorPage() {
           </Card>
         </div>
       </div>
+      )}
     </div>
   )
 }

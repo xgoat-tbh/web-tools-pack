@@ -5,6 +5,7 @@ import {
   Image, Maximize, FileImage, Palette, QrCode, EyeOff,
   Timer, StickyNote, Type, PenTool, CheckSquare,
   Swords,
+  Laugh, Terminal, DollarSign, Ruler,
 } from "lucide-react"
 
 export interface Tool {
@@ -57,6 +58,8 @@ export const categories: Category[] = [
       { name: "Timezone Converter", slug: "timezone", description: "Convert between timezones", icon: Globe, category: "data" },
       { name: "Date Difference", slug: "date-diff", description: "Calculate difference between dates", icon: CalendarDays, category: "data" },
       { name: "Age Calculator", slug: "age-calculator", description: "Calculate age from birthdate", icon: Baby, category: "data" },
+      { name: "Currency Converter", slug: "currency-converter", description: "Convert between currencies", icon: DollarSign, category: "data" },
+      { name: "Unit Converter", slug: "unit-converter", description: "Convert length, weight, temp & more", icon: Ruler, category: "data" },
     ],
   },
   {
@@ -69,6 +72,8 @@ export const categories: Category[] = [
       { name: "Color Picker", slug: "color-picker", description: "Pick colors from image", icon: Palette, category: "media" },
       { name: "Blur / Pixelate", slug: "blur-pixelate", description: "Blur or pixelate images", icon: EyeOff, category: "media" },
       { name: "QR Code Generator", slug: "qr-generator", description: "Generate QR codes", icon: QrCode, category: "media" },
+      { name: "Meme Generator", slug: "meme-generator", description: "Create memes with custom text", icon: Laugh, category: "media" },
+      { name: "ASCII Art Generator", slug: "ascii-art", description: "Convert images to ASCII art", icon: Terminal, category: "media" },
     ],
   },
   {

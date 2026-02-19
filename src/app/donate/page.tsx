@@ -460,53 +460,11 @@ export default function DonatePage() {
         )}
       </div>
 
-      {/* Upcoming Tools — what your support funds */}
-      <div className="mt-16 mb-8">
-        <div className="animate-fade-in-up mb-6 text-center">
-          <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-green-500/20 bg-green-500/10 px-4 py-1.5 text-sm text-green-400">
-            <Zap className="h-3.5 w-3.5" />
-            On the Roadmap
-          </div>
-          <h2 className="text-2xl font-bold">Tools We&apos;re Building Next</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Your support helps us build these — tools for everyone, everywhere.
-          </p>
-        </div>
-
-        <div className="grid gap-2 sm:grid-cols-2">
-          {[
-            { emoji: "📝", name: "Resume Builder", desc: "Create professional resumes with templates — export to PDF" },
-            { emoji: "🧮", name: "Invoice Generator", desc: "Generate invoices with logo, tax, and download as PDF" },
-            { emoji: "🔤", name: "Font Previewer", desc: "Preview Google Fonts side-by-side with custom text" },
-            { emoji: "📊", name: "JSON to CSV/Excel", desc: "Instantly convert JSON data to spreadsheet formats" },
-            { emoji: "🎨", name: "SVG Editor", desc: "Create & edit SVGs visually in the browser" },
-            { emoji: "🔗", name: "Link Shortener", desc: "Shorten URLs with QR codes and click tracking" },
-            { emoji: "🌐", name: "DNS Lookup", desc: "Look up DNS records for any domain" },
-            { emoji: "📸", name: "Screenshot to Code", desc: "Paste a screenshot, get HTML/CSS skeleton" },
-            { emoji: "🗣️", name: "Text to Speech", desc: "Convert text to audio with multiple voices" },
-            { emoji: "📅", name: "Cron Expression Builder", desc: "Build cron schedules with a visual editor" },
-            { emoji: "🔒", name: "SSL Certificate Checker", desc: "Check SSL cert expiry and details for any site" },
-            { emoji: "🖼️", name: "Favicon Generator", desc: "Generate favicons in all sizes from a single image" },
-          ].map((tool, i) => (
-            <div
-              key={i}
-              className="animate-fade-in-up flex items-start gap-3 rounded-lg border border-border/40 bg-card/30 p-3 transition-colors hover:border-green-500/20 hover:bg-green-500/5"
-              style={{ animationDelay: `${0.1 + i * 0.05}s` }}
-            >
-              <span className="text-xl shrink-0">{tool.emoji}</span>
-              <div>
-                <h4 className="text-sm font-semibold">{tool.name}</h4>
-                <p className="text-xs text-muted-foreground">{tool.desc}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="mt-4 text-center">
-          <p className="text-xs text-muted-foreground">
-            Have a tool idea? <a href="https://github.com/xgoat-tbh/web-tools-pack/issues" target="_blank" rel="noopener noreferrer" className="text-primary underline underline-offset-2 hover:text-pink-400">Open an issue on GitHub</a> and we&apos;ll consider it!
-          </p>
-        </div>
+      {/* Footer CTA */}
+      <div className="mt-12 mb-8 text-center">
+        <p className="text-xs text-muted-foreground">
+          Have a tool idea? <a href="https://github.com/xgoat-tbh/web-tools-pack/issues" target="_blank" rel="noopener noreferrer" className="text-primary underline underline-offset-2 hover:text-pink-400">Open an issue on GitHub</a> and we&apos;ll consider it!
+        </p>
       </div>
     </div>
   )

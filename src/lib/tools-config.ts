@@ -6,7 +6,7 @@ import {
   Timer, StickyNote, Type, PenTool, CheckSquare,
   Swords,
   Laugh, Terminal, DollarSign, Ruler,
-  Paintbrush, Square, Keyboard, Coins, ScanSearch,
+  Paintbrush, Square, Keyboard, Coins, ScanSearch, Languages,
 } from "lucide-react"
 
 export interface Tool {
@@ -95,6 +95,7 @@ export const categories: Category[] = [
       { name: "Stopwatch", slug: "stopwatch", description: "Precision stopwatch with laps", icon: Timer, category: "productivity" },
       { name: "Coin Flip & Dice", slug: "coin-dice", description: "Random decisions with style", icon: Coins, category: "productivity" },
       { name: "AI Content Detector", slug: "ai-detector", description: "Detect AI-generated text patterns", icon: ScanSearch, category: "productivity" },
+      { name: "Translator", slug: "translator", description: "Translate text between 100+ languages", icon: Languages, category: "productivity" },
     ],
   },
   {

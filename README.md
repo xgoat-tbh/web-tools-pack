@@ -118,8 +118,8 @@ Everything runs **100% in your browser**. Your files and data never leave your m
 | Tool | What it does |
 |------|-------------|
 | **CPS Benchmark** | Test your clicks per second with multiple durations |
-| **Typing Speed Benchmark** | Measure WPM & accuracy across difficulty levels |
-| **Scroll Speed Test** | Measure scroll speed (mouse wheel & touch) |
+| **Reaction Time Test** | Visual reaction speed test across 5 rounds |
+| **Keyboard Key Checker** | Check if all your keyboard keys are working (PC only) |
 | **Touch Latency Test** | Reaction-time tap test with per-round results |
 | **Browser Performance** | Canvas particle stress test with FPS scoring |
 

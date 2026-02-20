@@ -4,9 +4,10 @@ import { useState, useCallback } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
+import { CopyButton } from "@/components/copy-button"
 import {
   ScanSearch, RotateCcw, Brain, BarChart3, Loader2,
-  ChevronDown, ChevronUp,
+  ChevronDown, ChevronUp, BookOpen, Highlighter,
 } from "lucide-react"
 
 // ═══════════════════════════════════════════════════════════════
@@ -17,6 +18,7 @@ interface SentenceResult {
   text: string
   score: number
   isAI: boolean
+  triggers: string[]
 }
 
 interface AnalysisResult {
@@ -25,6 +27,10 @@ interface AnalysisResult {
   signals: Signal[]
   aiSentenceCount: number
   totalSentences: number
+  readability: {
+    score: number
+    label: string
+  }
 }
 
 interface Signal {
@@ -370,28 +376,73 @@ function analyzeStarters(sentences: string[]): Signal {
   }
 }
 
+// Readability Analysis (Flesch-Kincaid)
+function analyzeReadability(text: string): { score: number; label: string } {
+  const sentences = text.split(/[.!?]+/).filter((s) => s.trim().length > 0).length
+  const words = text.split(/\s+/).filter((w) => w.trim().length > 0).length
+  const syllables = text.split(/\s+/).reduce((acc, word) => {
+    word = word.toLowerCase().replace(/[^a-z]/g, "")
+    if (word.length <= 3) return acc + 1
+    const s = word
+      .replace(/(?:[^laeiouy]es|ed|[^laeiouy]e)$/, "")
+      .replace(/^y/, "")
+      .match(/[aeiouy]{1,2}/g)
+    return acc + (s ? s.length : 1)
+  }, 0)
+
+  if (sentences === 0 || words === 0) return { score: 0, label: "N/A" }
+
+  // Flesch Reading Ease
+  const ease = 206.835 - 1.015 * (words / sentences) - 84.6 * (syllables / words)
+  
+  // Flesch-Kincaid Grade Level
+  const grade = 0.39 * (words / sentences) + 11.8 * (syllables / words) - 15.59
+
+  let label = "Standard"
+  if (grade < 6) label = "Easy (5th-6th grade)"
+  else if (grade < 8) label = "Plain English (7th-8th grade)"
+  else if (grade < 10) label = "Conversational (9th-10th grade)"
+  else if (grade < 12) label = "Complex (11th-12th grade)"
+  else if (grade < 14) label = "College Level"
+  else label = "Academic / Professional"
+
+  return { score: Math.max(0, Math.min(100, ease)), label }
+}
+
 // ═══════════════════════════════════════════════════════════════
 // PER-SENTENCE SCORING
 // ═══════════════════════════════════════════════════════════════
 
-function scoreSentence(sent: string, avgSentLen: number, sentLenStd: number): number {
+function scoreSentence(sent: string, avgSentLen: number, sentLenStd: number): { score: number; triggers: string[] } {
   const lower = sent.toLowerCase()
   const words = sent.split(/\s+/).filter(Boolean)
   const wc = words.length
   let score = 0
+  const triggers: string[] = []
 
   // 1. AI phrases (heavy weight)
   for (const p of AI_PHRASES_STRONG) {
-    if (lower.includes(p)) { score += 28; break }
+    if (lower.includes(p)) { 
+      score += 28
+      triggers.push(p)
+      // break // Removed break to capture all triggers
+    }
   }
   for (const p of AI_PHRASES_MEDIUM) {
-    if (lower.includes(p)) { score += 15; break }
+    if (lower.includes(p)) { 
+      score += 15
+      triggers.push(p)
+      // break
+    }
   }
 
   // 2. AI vocabulary words
   let vocabHits = 0
   for (const v of AI_VOCABULARY) {
-    if (new RegExp(`\\b${v}\\b`, "i").test(lower)) vocabHits++
+    if (new RegExp(`\\b${v}\\b`, "i").test(lower)) {
+      vocabHits++
+      triggers.push(v)
+    }
   }
   score += Math.min(30, vocabHits * 8)
 
@@ -406,7 +457,10 @@ function scoreSentence(sent: string, avgSentLen: number, sentLenStd: number): nu
 
   // 5. Starts with transition
   const firstWord = words[0]?.toLowerCase().replace(/[^a-z]/g, "") || ""
-  if (TRANSITIONS.includes(firstWord)) score += 14
+  if (TRANSITIONS.includes(firstWord)) {
+    score += 14
+    triggers.push(firstWord)
+  }
 
   // 6. Sentence in "AI length sweet spot" (close to average = uniform)
   if (sentLenStd > 0) {
@@ -421,17 +475,24 @@ function scoreSentence(sent: string, avgSentLen: number, sentLenStd: number): nu
   if (commas >= 4 && wc > 15) score += 5
 
   // 8. Formal structural patterns
-  if (/\b(one of the most|both .+ and|plays? a .+ role|capable of|should be|rather than|aims? to|continues? to|offers? .+ opportunities|can be .+ as)\b/i.test(sent))
+  const formalPattern = /\b(one of the most|both .+ and|plays? a .+ role|capable of|should be|rather than|aims? to|continues? to|offers? .+ opportunities|can be .+ as)\b/i
+  const formalMatch = sent.match(formalPattern)
+  if (formalMatch) {
     score += 12
+    triggers.push(formalMatch[0])
+  }
 
   // 9. Common AI sentence starters
-  if (/^(additionally|furthermore|moreover|however|consequently|this|these|such|overall|ultimately|in\s)/i.test(sent.trim()))
+  const starterMatch = sent.trim().match(/^(additionally|furthermore|moreover|however|consequently|this|these|such|overall|ultimately|in\s)/i)
+  if (starterMatch) {
     score += 8
+    triggers.push(starterMatch[0])
+  }
 
   // 10. No question marks or exclamation — AI rarely uses these in essays
   if (!/[?!]/.test(sent) && wc > 12) score += 3
 
-  return clamp(score)
+  return { score: clamp(score), triggers: Array.from(new Set(triggers)) }
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -473,8 +534,8 @@ function analyze(text: string): AnalysisResult {
 
   // Per-sentence scoring
   const sentenceResults: SentenceResult[] = sentences.slice(0, 40).map((sent) => {
-    const s = scoreSentence(sent, avgSentLen, sentLenStd)
-    return { text: sent.trim(), score: s, isAI: s >= 40 }
+    const { score, triggers } = scoreSentence(sent, avgSentLen, sentLenStd)
+    return { text: sent.trim(), score, isAI: score >= 40, triggers }
   })
 
   const aiCount = sentenceResults.filter((s) => s.isAI).length
@@ -485,6 +546,7 @@ function analyze(text: string): AnalysisResult {
     signals,
     aiSentenceCount: aiCount,
     totalSentences: sentenceResults.length,
+    readability: analyzeReadability(text),
   }
 }
 
@@ -552,6 +614,7 @@ export default function AIDetectorPage() {
   const [result, setResult] = useState<AnalysisResult | null>(null)
   const [analyzing, setAnalyzing] = useState(false)
   const [showSignals, setShowSignals] = useState(false)
+  const [highlightTriggers, setHighlightTriggers] = useState(false)
 
   const handleAnalyze = useCallback(() => {
     const trimmed = text.trim()
@@ -660,6 +723,12 @@ export default function AIDetectorPage() {
                   <p className="text-[11px] text-muted-foreground">
                     Analyzed using 10 linguistic signals &bull; {wordCount} words processed
                   </p>
+                  
+                  {/* Readability Badge */}
+                  <div className="mt-3 inline-flex items-center gap-2 rounded-md border bg-muted/50 px-3 py-1.5 text-xs font-medium text-muted-foreground">
+                    <BookOpen className="h-3.5 w-3.5" />
+                    <span>Readability: <span className="text-foreground">{result.readability.label}</span> ({result.readability.score.toFixed(0)})</span>
+                  </div>
                 </div>
               </div>
             </CardContent>
@@ -670,29 +739,62 @@ export default function AIDetectorPage() {
             <CardContent className="p-5">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="font-semibold text-sm">Sentence Analysis</h3>
-                <div className="flex items-center gap-3 text-[10px]">
-                  <span className="flex items-center gap-1">
-                    <span className="inline-block w-3 h-3 rounded bg-yellow-500/40 border border-yellow-500/60" />
-                    AI-generated
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <span className="inline-block w-3 h-3 rounded bg-transparent border border-border" />
-                    Human
-                  </span>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost" size="sm"
+                    className={`h-8 gap-1.5 text-xs ${highlightTriggers ? "bg-accent text-accent-foreground" : ""}`}
+                    onClick={() => setHighlightTriggers(!highlightTriggers)}
+                  >
+                    <Highlighter className="h-3.5 w-3.5" />
+                    {highlightTriggers ? "Hide Triggers" : "Show Triggers"}
+                  </Button>
+                  <CopyButton text={result.sentences.map(s => s.text).join(" ")} />
                 </div>
+              </div>
+              
+              <div className="flex items-center gap-3 text-[10px] mb-3">
+                <span className="flex items-center gap-1">
+                  <span className="inline-block w-3 h-3 rounded bg-yellow-500/40 border border-yellow-500/60" />
+                  AI-generated
+                </span>
+                <span className="flex items-center gap-1">
+                  <span className="inline-block w-3 h-3 rounded bg-transparent border border-border" />
+                  Human
+                </span>
+                {highlightTriggers && (
+                  <span className="flex items-center gap-1 ml-2">
+                    <span className="font-bold text-red-500 underline decoration-red-400 decoration-2">Text</span>
+                    Trigger Phrase
+                  </span>
+                )}
               </div>
 
               {/* Highlighted text */}
               <div className="rounded-lg border border-border/50 bg-muted/20 p-4 text-sm leading-[1.8]">
-                {result.sentences.map((s, i) => (
-                  <span
-                    key={i}
-                    className={s.isAI ? "bg-yellow-500/30 decoration-yellow-500/60" : ""}
-                    title={`AI: ${s.score}%`}
-                  >
-                    {s.text}{" "}
-                  </span>
-                ))}
+                {result.sentences.map((s, i) => {
+                  let content: React.ReactNode = s.text
+                  
+                  if (highlightTriggers && s.triggers.length > 0) {
+                    const pattern = new RegExp(`(${s.triggers.sort((a, b) => b.length - a.length).map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})`, 'gi')
+                    const parts = s.text.split(pattern)
+                    content = parts.map((part, idx) => {
+                      const isTrigger = s.triggers.some(t => t.toLowerCase() === part.toLowerCase())
+                      return isTrigger 
+                        ? <span key={idx} className="font-bold text-red-600 underline decoration-red-400 decoration-2" title="AI Trigger">{part}</span>
+                        : part
+                    })
+                  }
+
+                  return (
+                    <span
+                      key={i}
+                      className={`${s.isAI ? "bg-yellow-500/30 decoration-yellow-500/60" : ""} hover:bg-yellow-500/20 transition-colors`}
+                      title={`AI Score: ${s.score}%${s.triggers.length ? `\nTriggers: ${s.triggers.join(", ")}` : ""}`}
+                    >
+                      {content}{" "}
+                    </span>
+                  )
+                })}
               </div>
 
               {/* Per-sentence breakdown */}

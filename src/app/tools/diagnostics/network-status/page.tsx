@@ -149,6 +149,36 @@ export default function NetworkStatus() {
           </CardContent>
         </Card>
       </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card>
+          <CardContent className="p-6">
+            <h3 className="font-semibold mb-2 flex items-center gap-2">
+              <Signal className="w-4 h-4" />
+              What is Latency?
+            </h3>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              <strong>Latency (or Ping)</strong> is the time it takes for a signal to travel from your computer to a server and back.
+              <br/><br/>
+              • <strong>&lt;50ms:</strong> Excellent. Instant feel.<br/>
+              • <strong>50-100ms:</strong> Good. Normal for most browsing.<br/>
+              • <strong>&gt;200ms:</strong> Poor. You will feel delays.
+            </p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-6">
+             <h3 className="font-semibold mb-2 flex items-center gap-2">
+              <Wifi className="w-4 h-4" />
+              Why does it change?
+            </h3>
+             <p className="text-sm text-muted-foreground leading-relaxed">
+               Your internet speed can fluctuate due to many factors: Wi-Fi interference, other people streaming video on your network, or congestion at your ISP. The "Average" helps smooth out these temporary spikes.
+             </p>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }

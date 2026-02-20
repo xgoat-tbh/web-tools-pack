@@ -203,6 +203,34 @@ export default function DeviceScan() {
           )}
         </div>
       )}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card>
+          <CardContent className="p-6">
+            <h3 className="font-semibold mb-2 flex items-center gap-2">
+              <Cpu className="w-4 h-4" />
+              Hardware Cores?
+            </h3>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              <strong>Cores</strong> are the "brains" of your processor. More cores allow your device to do more things at once (multitasking) without slowing down. 
+              <br/>
+              Most modern phones have 8 cores, while laptops range from 4 to 16+.
+            </p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-6">
+             <h3 className="font-semibold mb-2 flex items-center gap-2">
+              <Monitor className="w-4 h-4" />
+              Pixel Ratio?
+            </h3>
+             <p className="text-sm text-muted-foreground leading-relaxed">
+               This tells you how sharp your screen is. A ratio of <strong>2x or 3x</strong> (Retina/High-DPI) means the screen packs more physical pixels into each "software" pixel, making text and images look incredibly crisp.
+             </p>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }

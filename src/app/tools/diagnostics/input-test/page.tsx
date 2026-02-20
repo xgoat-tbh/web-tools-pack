@@ -138,6 +138,35 @@ export default function InputTest() {
           </CardContent>
         </Card>
       </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card>
+          <CardContent className="p-6">
+            <h3 className="font-semibold mb-2 flex items-center gap-2">
+              <Zap className="w-4 h-4" />
+              What is Input Latency?
+            </h3>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              <strong>Latency</strong> is the delay between your physical action (clicking a mouse or pressing a key) and the computer registering it. 
+              <br/><br/>
+              Low latency means your computer feels "snappy" and responsive. High latency makes it feel sluggish or like it's lagging behind your hands.
+            </p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-6">
+             <h3 className="font-semibold mb-2 flex items-center gap-2">
+              <RotateCcw className="w-4 h-4" />
+              Understanding the Data
+            </h3>
+             <ul className="text-sm text-muted-foreground space-y-2 list-disc pl-4">
+                <li><strong>Delta:</strong> The time difference between the current event and the previous one. A consistent rhythm means good stability.</li>
+                <li><strong>MouseDown vs MouseUp:</strong> A full "click" is two actions. The time between them is how long you held the button down.</li>
+             </ul>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }

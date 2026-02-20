@@ -178,6 +178,36 @@ export default function FPSTest() {
           </div>
         )}
       </Card>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card>
+          <CardContent className="p-6">
+            <h3 className="font-semibold mb-2 flex items-center gap-2">
+              <Activity className="w-4 h-4" />
+              What is FPS?
+            </h3>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              <strong>FPS (Frames Per Second)</strong> measures how smoothly your computer can draw the screen.
+              <br/><br/>
+              • <strong>60 FPS:</strong> Standard smoothness. Everything looks fluid.<br/>
+              • <strong>30 FPS:</strong> Playable but looks a bit choppy.<br/>
+              • <strong>Below 30:</strong> Very stuttery and unpleasant.
+            </p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-6">
+             <h3 className="font-semibold mb-2 flex items-center gap-2">
+              <RotateCcw className="w-4 h-4" />
+              What is "Low (1%)"?
+            </h3>
+             <p className="text-sm text-muted-foreground leading-relaxed">
+               This measures the worst stutters you experienced. Even if your average FPS is high, a low "1% Low" score means you are seeing occasional freezes or hitches. Ideally, this number should be close to your average FPS.
+             </p>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }

@@ -55,7 +55,7 @@ export default function ScreenTest() {
   if (activeColor) {
     return (
       <div 
-        className={`fixed inset-0 z-50 ${activeColor} cursor-pointer`} 
+        className={`fixed inset-0 z-[9999] ${activeColor} cursor-pointer`} 
         onClick={() => setActiveColor(null)}
       >
         <div className="absolute top-4 right-4 bg-black/50 text-white p-2 rounded-full opacity-0 hover:opacity-100 transition-opacity">
@@ -77,7 +77,7 @@ export default function ScreenTest() {
             Screen Analyzer
           </h1>
           <p className="text-muted-foreground">
-            Dead pixel check and refresh rate estimator.
+            Check for dead pixels and measure your screen's refresh rate.
           </p>
         </div>
         <div className="text-right">
@@ -100,17 +100,31 @@ export default function ScreenTest() {
         ))}
       </div>
 
-      <Card>
-        <CardContent className="p-6">
-          <h3 className="font-semibold mb-2">Instructions</h3>
-          <ul className="list-disc pl-5 space-y-1 text-sm text-muted-foreground">
-            <li>Click a color to enter full-screen mode.</li>
-            <li>Look closely at your screen for any pixels that don't match the color (dead or stuck pixels).</li>
-            <li>Cycle through all colors (especially White, Black, Red, Green, Blue) for a complete check.</li>
-            <li>Press <strong>ESC</strong> or click anywhere to exit full-screen mode.</li>
-          </ul>
-        </CardContent>
-      </Card>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card>
+          <CardContent className="p-6">
+            <h3 className="font-semibold mb-2 flex items-center gap-2">
+              <Monitor className="w-4 h-4" />
+              What is this?
+            </h3>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              This tool helps you find <strong>dead pixels</strong> (pixels that don't light up) or <strong>stuck pixels</strong> (pixels stuck on one color). By cycling through solid colors, you can easily spot tiny dots that don't match the background.
+            </p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-6">
+             <h3 className="font-semibold mb-2 flex items-center gap-2">
+              <Zap className="w-4 h-4" />
+              Refresh Rate
+            </h3>
+             <p className="text-sm text-muted-foreground leading-relaxed">
+               Your <strong>Refresh Rate (Hz)</strong> is how many times per second your screen updates. A higher number (like 120Hz or 144Hz) means smoother motion in games and scrolling. Most standard screens are 60Hz.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }

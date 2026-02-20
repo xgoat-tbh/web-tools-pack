@@ -1,8 +1,8 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Fingerprint, Monitor, Globe, Clock, Shield, Cpu, Lock } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Fingerprint, Monitor, Globe, Clock, Shield, Cpu, Lock, ShieldAlert } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 
 export default function BrowserFingerprint() {
@@ -138,6 +138,46 @@ export default function BrowserFingerprint() {
                 <div className="text-sm font-medium text-muted-foreground">Pixel Ratio</div>
                 <div className="font-semibold">{data.pixelRatio}x</div>
               </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Raw Data</CardTitle>
+          <CardDescription>
+            This is exactly what websites see when you visit them.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <pre className="bg-muted p-4 rounded-lg overflow-auto text-xs font-mono max-h-96">
+            {JSON.stringify(data, null, 2)}
+          </pre>
+        </CardContent>
+      </Card>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card>
+          <CardContent className="p-6">
+            <h3 className="font-semibold mb-2 flex items-center gap-2">
+              <Fingerprint className="w-4 h-4" />
+              What is a Fingerprint?
+            </h3>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Just like your real fingerprint, your browser has a unique combination of settings (screen size, fonts, time zone, battery level) that makes it distinguishable from millions of others.
+            </p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-6">
+             <h3 className="font-semibold mb-2 flex items-center gap-2">
+              <ShieldAlert className="w-4 h-4" />
+              Why does it matter?
+            </h3>
+             <p className="text-sm text-muted-foreground leading-relaxed">
+               Advertisers use this "fingerprint" to track you across the web, even if you clear your cookies or use Incognito mode. It's a way to identify you without your permission.
+             </p>
           </CardContent>
         </Card>
       </div>

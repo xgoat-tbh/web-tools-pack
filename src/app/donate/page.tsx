@@ -56,7 +56,6 @@ export default function DonatePage() {
   const [qrReady, setQrReady] = useState(false)
   const [showHearts, setShowHearts] = useState(false)
   const [hovered, setHovered] = useState(false)
-  const [selectedAmount, setSelectedAmount] = useState<number | null>(null)
   const [region, setRegion] = useState<Region>("loading")
   const [detectedCountry, setDetectedCountry] = useState<string>("")
 
@@ -80,14 +79,13 @@ export default function DonatePage() {
   const isIndia = region === "india"
   const isInternational = region === "international"
 
-  // Generate QR code
-  const generateQR = async (amount?: number) => {
+  // Generate QR code for a fixed ₹10 amount
+  const generateQR = async () => {
     const QRCode = (await import("qrcode")).default
     const canvas = canvasRef.current
     if (!canvas) return
 
-    let upiURL = `upi://pay?pa=${UPI_ID}&pn=WebToolsPack&cu=INR`
-    if (amount) upiURL += `&am=${amount}`
+    const upiURL = `upi://pay?pa=${UPI_ID}&pn=WebToolsPack&cu=INR&am=10`
 
     await QRCode.toCanvas(canvas, upiURL, {
       width: 280,
@@ -176,9 +174,7 @@ export default function DonatePage() {
 
             <div className="relative text-center">
               <p className="mb-1 text-sm font-medium text-muted-foreground">Scan to Pay via UPI</p>
-              {selectedAmount && (
-                <p className="mb-1 text-xs font-semibold text-pink-400 animate-fade-in-up">Amount: ₹{selectedAmount}</p>
-              )}
+              <p className="mb-1 text-xs font-semibold text-pink-400 animate-fade-in-up">Fixed amount: ₹10</p>
               <div className="relative mx-auto mb-4 inline-block">
                 {/* QR glow ring */}
                 <div className={`absolute -inset-4 rounded-2xl bg-gradient-to-br from-pink-500/20 via-purple-500/20 to-cyan-500/20 blur-xl transition-opacity duration-700 ${hovered ? "opacity-100" : "opacity-0"}`} />
@@ -220,24 +216,8 @@ export default function DonatePage() {
         <div className="w-full max-w-sm space-y-6">
           {/* Quick amounts */}
           <div className="animate-fade-in-up animation-delay-400">
-            <p className="mb-3 text-sm font-medium text-muted-foreground">Suggested amounts</p>
-            <div className="grid grid-cols-3 gap-2">
-              <button
-                onClick={() => {
-                  setSelectedAmount(10)
-                  generateQR(10)
-                }}
-                className={`animate-scale-in group relative overflow-hidden rounded-lg border px-3 py-3 text-center transition-all duration-300 hover:-translate-y-0.5 hover:border-pink-500/40 hover:shadow-lg hover:shadow-pink-500/10 ${
-                  selectedAmount === 10
-                    ? "border-pink-500/60 bg-pink-500/10 shadow-lg shadow-pink-500/10"
-                    : "border-border/60 bg-card"
-                }`}
-                style={{ animationDelay: "0.5s" }}
-              >
-                <div className="absolute inset-0 bg-gradient-to-br from-pink-500/0 to-purple-500/0 transition-all duration-300 group-hover:from-pink-500/10 group-hover:to-purple-500/10" />
-                <span className="relative text-lg font-bold">₹10</span>
-              </button>
-            </div>
+            <p className="mb-1 text-sm font-medium text-muted-foreground">UPI QR is locked to</p>
+            <p className="text-xl font-bold text-pink-400">₹10</p>
           </div>
 
           {/* Perks */}

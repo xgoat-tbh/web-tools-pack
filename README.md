@@ -35,7 +35,7 @@ Everything runs **100% in your browser**. Your files and data never leave your m
 
 | | |
 |---|---|
-| 🧰 **54 tools** across 7 categories | 🛡️ **Privacy first** — nothing is uploaded, ever |
+| 🧰 **49 tools** across 6 categories | 🛡️ **Privacy first** — nothing is uploaded, ever |
 | 🌗 **Dark & light mode** with smooth transitions | ⌨️ **Command palette** — press `Ctrl+K` to jump anywhere |
 | 📱 **Responsive** — works on desktop, tablet, mobile | ⚡ **Fast** — static pages, code-split, tiny bundles |
 | 🖱️ **Drag & drop** everywhere — images, files, you name it | 📋 **Copy to clipboard** on every output |
@@ -122,7 +122,7 @@ Everything runs **100% in your browser**. Your files and data never leave your m
 | **Reaction Time Test** | Visual reaction speed test across 5 rounds |
 | **Keyboard Key Checker** | Check if all your keyboard keys are working (PC only) |
 | **Browser Performance** | Canvas particle stress test with FPS scoring |
-| **Network Speed Check** | Test your internet download speed |
+| **Network Speed Check** | Measure your download speed and latency (Cloudflare-powered) |
 
 ---
 
@@ -251,6 +251,6 @@ See [LICENSE](LICENSE) for the full terms.
 
 **Built with ❤️ by [xgoat-tbh](https://github.com/xgoat-tbh)**
 
-One dashboard. 48 tools. No BS.
+One dashboard. 49 tools. No BS.
 
 </div>

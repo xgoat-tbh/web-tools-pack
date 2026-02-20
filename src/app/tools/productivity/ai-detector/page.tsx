@@ -58,13 +58,23 @@ const AI_PHRASES_STRONG = [
   "plays a crucial role", "plays a vital role", "plays a pivotal role",
   "leverage the power", "harness the power",
   "navigate the complexities", "navigate the landscape",
-  "tapestry of", "rich tapestry",
+  "tapestry of", "rich tapestry", "intricate tapestry",
   "a testament to", "stands as a testament",
   "it cannot be overstated", "the intricacies of",
   "paves the way", "a myriad of",
   "in the grand scheme", "sheds light on",
   "whether you're a beginner or", "whether you're a seasoned",
   "as we navigate", "in this article, we will",
+  "remember that", "keep in mind that",
+  "serve as a foundation", "serves as a foundation",
+  "not only ... but also", "not only does it",
+  "integral part of", "cornerstone of",
+  "underscores the importance", "highlighting the need",
+  "transformative power", "paradigm shift",
+  "in summary, ", "to summarize, ",
+  "all in all, ", "by and large, ",
+  "explore the various", "exploring the",
+  "gain a deeper understanding", "broader context",
 ]
 
 const AI_PHRASES_MEDIUM = [
@@ -86,6 +96,12 @@ const AI_PHRASES_MEDIUM = [
   "aiming to create", "balanced partnership",
   "can be viewed as", "capable of",
   "offers both", "offers significant",
+  "key factors", "vital components",
+  "essential elements", "critical aspects",
+  "diverse array of", "wide variety of",
+  "enhancing the", "ensuring that",
+  "making it easier to", "allowing for",
+  "due to the fact that", "in light of",
 ]
 
 // --- AI VOCABULARY (single words AI overuses) ---
@@ -107,6 +123,11 @@ const AI_VOCABULARY = [
   "moreover", "additionally", "consequently", "nonetheless",
   "increasingly", "substantial", "implementing", "proficiency",
   "infrastructure", "methodology", "proliferation",
+  "nuance", "mitigate", "harness", "framework", "mechanism",
+  "resilience", "sustainability", "evolution", "landscape",
+  "realm", "tapestry", "symphony", "plethora", "beacon",
+  "unlock", "unleash", "bridge", "align", "drive",
+  "ensure", "enable", "enhance", "crucial", "vital",
 ]
 
 const CONTRACTIONS = [
@@ -173,11 +194,12 @@ function analyzeAIPhrases(lower: string, wordCount: number): Signal {
   for (const p of AI_PHRASES_MEDIUM) {
     if (lower.includes(p)) { medHits++; if (found.length < 4) found.push(p) }
   }
-  const totalWeighted = strongHits * 3 + medHits * 1.5
+  // Increased weights: Strong 3->5, Med 1.5->2
+  const totalWeighted = strongHits * 5 + medHits * 2
   const per100 = totalWeighted / Math.max(1, wordCount / 100)
-  const score = clamp(per100 * 15)
+  const score = clamp(per100 * 18) // Multiplier 15->18
   return {
-    name: "AI Phrases", score, weight: 0.18,
+    name: "AI Phrases", score, weight: 0.22, // Weight 0.18->0.22
     detail: found.length > 0
       ? `${strongHits} strong + ${medHits} medium: "${found.slice(0, 3).join('", "')}"${found.length > 3 ? "..." : ""}`
       : "None detected",
@@ -193,9 +215,9 @@ function analyzeVocabulary(lower: string, wordCount: number): Signal {
     if (m) { hits += m.length; if (found.length < 5) found.push(w) }
   }
   const per100 = hits / Math.max(1, wordCount / 100)
-  const score = clamp(per100 * 12)
+  const score = clamp(per100 * 15) // Multiplier 12->15
   return {
-    name: "AI Vocabulary", score, weight: 0.14,
+    name: "AI Vocabulary", score, weight: 0.18, // Weight 0.14->0.18
     detail: hits > 0 ? `${hits} hits: ${found.join(", ")}` : "None detected",
   }
 }
@@ -423,16 +445,14 @@ function scoreSentence(sent: string, avgSentLen: number, sentLenStd: number): { 
   // 1. AI phrases (heavy weight)
   for (const p of AI_PHRASES_STRONG) {
     if (lower.includes(p)) { 
-      score += 28
+      score += 45
       triggers.push(p)
-      // break // Removed break to capture all triggers
     }
   }
   for (const p of AI_PHRASES_MEDIUM) {
     if (lower.includes(p)) { 
-      score += 15
+      score += 25
       triggers.push(p)
-      // break
     }
   }
 
@@ -444,53 +464,61 @@ function scoreSentence(sent: string, avgSentLen: number, sentLenStd: number): { 
       triggers.push(v)
     }
   }
-  score += Math.min(30, vocabHits * 8)
+  score += Math.min(45, vocabHits * 12)
 
   // 3. No contractions
   const hasContraction = CONTRACTIONS.some((c) =>
     new RegExp(`\\b${c.replace("'", "[''']")}\\b`, "i").test(lower)
   )
-  if (!hasContraction && wc > 6) score += 10
+  if (!hasContraction && wc > 6) score += 15
 
   // 4. No personal voice
-  if (!/\b(i|me|my|we|our|you|your)\b/i.test(lower) && wc > 8) score += 8
+  if (!/\b(i|me|my|we|our|you|your)\b/i.test(lower) && wc > 8) score += 12
 
   // 5. Starts with transition
   const firstWord = words[0]?.toLowerCase().replace(/[^a-z]/g, "") || ""
   if (TRANSITIONS.includes(firstWord)) {
-    score += 14
+    score += 18
     triggers.push(firstWord)
   }
 
   // 6. Sentence in "AI length sweet spot" (close to average = uniform)
   if (sentLenStd > 0) {
     const deviation = Math.abs(wc - avgSentLen) / sentLenStd
-    if (deviation < 0.5) score += 10 // very close to mean
-    else if (deviation < 1.0) score += 5
+    if (deviation < 0.5) score += 15 // very close to mean
+    else if (deviation < 1.0) score += 8
   }
 
   // 7. Comma-heavy complex sentence
   const commas = (sent.match(/,/g) || []).length
-  if (commas >= 3 && wc > 12) score += 8
+  if (commas >= 3 && wc > 12) score += 10
   if (commas >= 4 && wc > 15) score += 5
 
   // 8. Formal structural patterns
   const formalPattern = /\b(one of the most|both .+ and|plays? a .+ role|capable of|should be|rather than|aims? to|continues? to|offers? .+ opportunities|can be .+ as)\b/i
   const formalMatch = sent.match(formalPattern)
   if (formalMatch) {
-    score += 12
+    score += 20
     triggers.push(formalMatch[0])
   }
 
   // 9. Common AI sentence starters
   const starterMatch = sent.trim().match(/^(additionally|furthermore|moreover|however|consequently|this|these|such|overall|ultimately|in\s)/i)
   if (starterMatch) {
-    score += 8
+    score += 12
     triggers.push(starterMatch[0])
   }
 
   // 10. No question marks or exclamation — AI rarely uses these in essays
-  if (!/[?!]/.test(sent) && wc > 12) score += 3
+  if (!/[?!]/.test(sent) && wc > 12) score += 5
+
+  // 11. Hedging / Safety Language
+  const hedgingPattern = /\b(it is important to|while it is true|typically|generally|in most cases|depending on|vary depending|it depends|crucial to consider|worth considering)\b/i
+  const hedgeMatch = sent.match(hedgingPattern)
+  if (hedgeMatch) {
+    score += 15
+    triggers.push(hedgeMatch[0])
+  }
 
   return { score: clamp(score), triggers: Array.from(new Set(triggers)) }
 }

@@ -3,7 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Smartphone, RotateCcw, Trophy, Zap } from "lucide-react"
+import { Smartphone, RotateCcw, Trophy, Zap, AlertTriangle } from "lucide-react"
 
 interface LatencyResult {
   reaction: number
@@ -16,10 +16,20 @@ export default function TouchLatencyPage() {
   const [results, setResults] = useState<LatencyResult[]>([])
   const [best, setBest] = useState(0)
   const [round, setRound] = useState(0)
+  const [hasTouchscreen, setHasTouchscreen] = useState<boolean | null>(null)
   const readyTimeRef = useRef(0)
   const timeoutRef = useRef<ReturnType<typeof setTimeout>>()
 
   const TOTAL_ROUNDS = 5
+
+  // Detect touchscreen
+  useEffect(() => {
+    const hasTouch =
+      "ontouchstart" in window ||
+      navigator.maxTouchPoints > 0 ||
+      window.matchMedia("(pointer: coarse)").matches
+    setHasTouchscreen(hasTouch)
+  }, [])
 
   useEffect(() => {
     try {
@@ -115,6 +125,36 @@ export default function TouchLatencyPage() {
     }
   }
 
+  // No touchscreen detected
+  if (hasTouchscreen === false) {
+    return (
+      <div className="mx-auto max-w-2xl space-y-6">
+        <div className="flex items-center gap-2">
+          <Smartphone className="h-6 w-6 text-primary" />
+          <h1 className="text-2xl font-bold">Touch Latency Test</h1>
+        </div>
+        <Card>
+          <CardContent className="p-8 text-center space-y-4">
+            <AlertTriangle className="h-12 w-12 mx-auto text-yellow-500" />
+            <h2 className="text-xl font-semibold">No Touchscreen Detected</h2>
+            <p className="text-muted-foreground">
+              This tool is designed for touchscreen devices. Open this page on a phone or tablet to test your touch latency.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  // Loading
+  if (hasTouchscreen === null) {
+    return (
+      <div className="mx-auto max-w-2xl flex items-center justify-center min-h-[300px]">
+        <p className="text-muted-foreground">Detecting touchscreen...</p>
+      </div>
+    )
+  }
+
   return (
     <div className="mx-auto max-w-2xl space-y-4">
       <div className="flex items-center gap-2">
@@ -122,7 +162,7 @@ export default function TouchLatencyPage() {
         <h1 className="text-2xl font-bold">Touch Latency Test</h1>
       </div>
       <p className="text-sm text-muted-foreground">
-        Measure your reaction time and touch/click response latency.
+        Measure your reaction time and touch response latency.
         Wait for <span className="text-green-400 font-medium">green</span>, then tap as fast as you can!
       </p>
 

@@ -3,7 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Zap, RotateCcw, Trophy, Timer } from "lucide-react"
+import { Zap, RotateCcw, Trophy, Timer, CircleDot, AlertTriangle, Target } from "lucide-react"
 
 type Phase = "idle" | "waiting" | "ready" | "done" | "early"
 
@@ -115,7 +115,7 @@ export default function ReactionTestPage() {
         <CardContent className="flex flex-col items-center justify-center min-h-[300px] p-8">
           {phase === "idle" && times.length === 0 && (
             <div className="text-center space-y-3">
-              <div className="text-6xl">🎯</div>
+              <Target className="h-14 w-14 mx-auto text-primary" />
               <p className="text-xl font-semibold">Click to Start</p>
               <p className="text-sm text-muted-foreground">Test your reaction speed</p>
             </div>
@@ -128,20 +128,26 @@ export default function ReactionTestPage() {
           )}
           {phase === "waiting" && (
             <div className="text-center space-y-3">
-              <div className="text-6xl animate-pulse">🔴</div>
+              <div className="mx-auto h-16 w-16 rounded-full bg-red-500/20 flex items-center justify-center animate-pulse">
+                <CircleDot className="h-10 w-10 text-red-500" />
+              </div>
               <p className="text-xl font-semibold text-red-400">Wait for green...</p>
-              <p className="text-sm text-muted-foreground">Don't click yet!</p>
+              <p className="text-sm text-muted-foreground">Don&apos;t click yet!</p>
             </div>
           )}
           {phase === "ready" && (
             <div className="text-center space-y-3">
-              <div className="text-6xl">🟢</div>
+              <div className="mx-auto h-16 w-16 rounded-full bg-green-500/20 flex items-center justify-center">
+                <Zap className="h-10 w-10 text-green-500" />
+              </div>
               <p className="text-2xl font-bold text-green-400">CLICK NOW!</p>
             </div>
           )}
           {phase === "early" && (
             <div className="text-center space-y-3">
-              <div className="text-6xl">⚡</div>
+              <div className="mx-auto h-16 w-16 rounded-full bg-orange-500/20 flex items-center justify-center">
+                <AlertTriangle className="h-10 w-10 text-orange-500" />
+              </div>
               <p className="text-xl font-semibold text-orange-400">Too early!</p>
               <p className="text-sm text-muted-foreground">Click to try again</p>
             </div>

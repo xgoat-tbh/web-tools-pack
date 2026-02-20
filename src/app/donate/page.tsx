@@ -105,7 +105,7 @@ export default function DonatePage() {
     if (isIndia) generateQR()
   }, [region])
 
-  const amounts = [49, 99, 199, 499, 999]
+  const amounts = [10, 49, 99, 199, 499, 999]
 
   return (
     <div className="relative mx-auto max-w-4xl">

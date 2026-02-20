@@ -1,14 +1,14 @@
 <div align="center">
 
-# 🛠️ Web Tools Pack
+# 🛠️ ToolHex
 
-### 54 free tools. One smart dashboard. Zero data collection.
+### 49 free tools. One smart dashboard. Zero data collection.
 
 Stop bouncing between 20 different websites — format, convert, encode, generate, and more, all from a single tab.
 
 <br/>
 
-**[🌐 Use it now → web-tools-pack.vercel.app](https://web-tools-pack.vercel.app)**
+**[🌐 Use it now → toolhex.vercel.app](https://toolhex.vercel.app)**
 
 <br/>
 
@@ -44,16 +44,6 @@ Everything runs **100% in your browser**. Your files and data never leave your m
 
 ## 📦 All 54 Tools
 
-### 🩺 Diagnostics
-
-| Tool | What it does |
-|------|-------------|
-| **One-Click Device Scan** | Full system health check (User Agent, Battery, Screen) |
-| **FPS & Rendering** | Measure frame rate stability & animation smoothness |
-| **Input Latency** | Test mouse click & keyboard input delay |
-| **Network Diagnostics** | Check connection status & API latency |
-| **Browser Fingerprint** | Analyze your unique browser ID & exposure |
-| **Screen Analyzer** | Dead pixel check & refresh rate estimator |
 
 ### 🔧 Dev Tools
 
@@ -132,6 +122,7 @@ Everything runs **100% in your browser**. Your files and data never leave your m
 | **Reaction Time Test** | Visual reaction speed test across 5 rounds |
 | **Keyboard Key Checker** | Check if all your keyboard keys are working (PC only) |
 | **Browser Performance** | Canvas particle stress test with FPS scoring |
+| **Network Speed Check** | Test your internet download speed |
 
 ---
 

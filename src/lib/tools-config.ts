@@ -119,6 +119,7 @@ export const categories: Category[] = [
       { name: "Reaction Time Test", slug: "reaction-test", description: "Test your reaction speed", icon: Zap, category: "benchmarks" },
       { name: "Keyboard Key Checker", slug: "keyboard-test", description: "Check if all your keys work", icon: Keyboard, category: "benchmarks" },
       { name: "Browser Performance", slug: "browser-perf", description: "Stress-test your browser rendering", icon: Monitor, category: "benchmarks" },
+      { name: "Network Speed Check", slug: "network-speed", description: "Test your internet speed", icon: Wifi, category: "benchmarks" },
     ],
   },
 ]

@@ -222,34 +222,20 @@ export default function DonatePage() {
           <div className="animate-fade-in-up animation-delay-400">
             <p className="mb-3 text-sm font-medium text-muted-foreground">Suggested amounts</p>
             <div className="grid grid-cols-3 gap-2">
-              {amounts.map((amt, i) => (
-                <button
-                  key={amt}
-                  onClick={() => {
-                    setSelectedAmount(amt)
-                    generateQR(amt)
-                  }}
-                  className={`animate-scale-in group relative overflow-hidden rounded-lg border px-3 py-3 text-center transition-all duration-300 hover:-translate-y-0.5 hover:border-pink-500/40 hover:shadow-lg hover:shadow-pink-500/10 ${
-                    selectedAmount === amt
-                      ? "border-pink-500/60 bg-pink-500/10 shadow-lg shadow-pink-500/10"
-                      : "border-border/60 bg-card"
-                  }`}
-                  style={{ animationDelay: `${0.5 + i * 0.08}s` }}
-                >
-                  <div className="absolute inset-0 bg-gradient-to-br from-pink-500/0 to-purple-500/0 transition-all duration-300 group-hover:from-pink-500/10 group-hover:to-purple-500/10" />
-                  <span className="relative text-lg font-bold">₹{amt}</span>
-                </button>
-              ))}
-
               <button
                 onClick={() => {
-                  setSelectedAmount(null)
-                  generateQR()
+                  setSelectedAmount(10)
+                  generateQR(10)
                 }}
-                className="animate-scale-in group relative overflow-hidden rounded-lg border border-dashed border-border/60 bg-card px-3 py-3 text-center transition-all duration-300 hover:-translate-y-0.5 hover:border-pink-500/40"
-                style={{ animationDelay: "0.9s" }}
+                className={`animate-scale-in group relative overflow-hidden rounded-lg border px-3 py-3 text-center transition-all duration-300 hover:-translate-y-0.5 hover:border-pink-500/40 hover:shadow-lg hover:shadow-pink-500/10 ${
+                  selectedAmount === 10
+                    ? "border-pink-500/60 bg-pink-500/10 shadow-lg shadow-pink-500/10"
+                    : "border-border/60 bg-card"
+                }`}
+                style={{ animationDelay: "0.5s" }}
               >
-                <span className="relative text-sm text-muted-foreground group-hover:text-pink-400">Any Amount</span>
+                <div className="absolute inset-0 bg-gradient-to-br from-pink-500/0 to-purple-500/0 transition-all duration-300 group-hover:from-pink-500/10 group-hover:to-purple-500/10" />
+                <span className="relative text-lg font-bold">₹10</span>
               </button>
             </div>
           </div>

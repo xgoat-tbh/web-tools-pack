@@ -4,9 +4,9 @@ import {
   Calculator, Percent, Dice1, Clock, Globe, CalendarDays, Baby,
   Image, Maximize, FileImage, Palette, QrCode, EyeOff,
   Timer, StickyNote, Type, PenTool, CheckSquare,
-  Swords,
   Laugh, Terminal, DollarSign, Ruler,
   Paintbrush, Square, Keyboard, Coins, ScanSearch, Languages,
+  Mouse, ArrowDownUp, Smartphone, Monitor, Gauge,
 } from "lucide-react"
 
 export interface Tool {
@@ -99,10 +99,14 @@ export const categories: Category[] = [
     ],
   },
   {
-    name: "Valorant",
-    slug: "valorant",
+    name: "Benchmarks",
+    slug: "benchmarks",
     tools: [
-      { name: "Team Comp Suggester", slug: "team-comp", description: "Get balanced agent compositions", icon: Swords, category: "valorant" },
+      { name: "CPS Benchmark", slug: "cps-test", description: "Test your clicks per second", icon: Mouse, category: "benchmarks" },
+      { name: "Typing Speed Benchmark", slug: "typing-speed", description: "Measure typing speed & accuracy", icon: Keyboard, category: "benchmarks" },
+      { name: "Scroll Speed Benchmark", slug: "scroll-speed", description: "Test your scroll speed", icon: ArrowDownUp, category: "benchmarks" },
+      { name: "Touch Latency Test", slug: "touch-latency", description: "Measure reaction & touch latency", icon: Smartphone, category: "benchmarks" },
+      { name: "Browser Performance", slug: "browser-perf", description: "Stress-test your browser rendering", icon: Monitor, category: "benchmarks" },
     ],
   },
 ]

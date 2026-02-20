@@ -2,7 +2,7 @@
 
 # 🛠️ Web Tools Pack
 
-### 44 free tools. One dashboard. Zero data collection.
+### 49 free tools. One smart dashboard. Zero data collection.
 
 Stop bouncing between 20 different websites — format, convert, encode, generate, and more, all from a single tab.
 
@@ -35,14 +35,14 @@ Everything runs **100% in your browser**. Your files and data never leave your m
 
 | | |
 |---|---|
-| 🧰 **44 tools** across 6 categories | 🛡️ **Privacy first** — nothing is uploaded, ever |
+| 🧰 **49 tools** across 6 categories | 🛡️ **Privacy first** — nothing is uploaded, ever |
 | 🌗 **Dark & light mode** with smooth transitions | ⌨️ **Command palette** — press `Ctrl+K` to jump anywhere |
 | 📱 **Responsive** — works on desktop, tablet, mobile | ⚡ **Fast** — static pages, code-split, tiny bundles |
 | 🖱️ **Drag & drop** everywhere — images, files, you name it | 📋 **Copy to clipboard** on every output |
 
 ---
 
-## 📦 All 44 Tools
+## 📦 All 49 Tools
 
 ### 🔧 Dev Tools
 
@@ -111,12 +111,17 @@ Everything runs **100% in your browser**. Your files and data never leave your m
 | **Stopwatch** | Precision stopwatch with lap times |
 | **Coin Flip & Dice** | Random decisions with animated coin & dice |
 | **AI Content Detector** | Detect AI-generated text patterns |
+| **Translator** | Translate text between 20+ languages |
 
-### 🎮 Valorant
+### 🏁 Benchmarks
 
 | Tool | What it does |
 |------|-------------|
-| **Team Comp Suggester** | Balanced 5-agent comps for every map |
+| **CPS Benchmark** | Test your clicks per second with multiple durations |
+| **Typing Speed Benchmark** | Measure WPM & accuracy across difficulty levels |
+| **Scroll Speed Test** | Measure scroll speed (mouse wheel & touch) |
+| **Touch Latency Test** | Reaction-time tap test with per-round results |
+| **Browser Performance** | Canvas particle stress test with FPS scoring |
 
 ---
 
@@ -146,7 +151,7 @@ Open [localhost:3000](http://localhost:3000) and you're in.
 src/
 ├── app/
 │   ├── layout.tsx              # Root layout (AppShell wrapper)
-│   ├── page.tsx                # Homepage — tool grid
+│   ├── page.tsx                # Smart Dashboard (recent, pinned, search)
 │   ├── globals.css             # CSS variables, animations, global styles
 │   ├── donate/                 # Donation page
 │   └── tools/
@@ -154,8 +159,8 @@ src/
 │       ├── encoding/           # 6 encoding & security tools
 │       ├── data/               # 9 data & converter tools
 │       ├── media/              # 8 media & file tools
-│       ├── productivity/       # 9 productivity tools
-│       └── valorant/           # 1 valorant tool
+│       ├── productivity/       # 10 productivity tools
+│       └── benchmarks/         # 5 benchmark tools
 ├── components/
 │   ├── ui/                     # shadcn/ui primitives
 │   ├── app-shell.tsx           # Sidebar + header layout
@@ -165,11 +170,11 @@ src/
 │   ├── copy-button.tsx         # Copy-to-clipboard button
 │   └── file-dropzone.tsx       # Drag-and-drop upload component
 ├── hooks/
-│   └── use-copy.ts             # Clipboard hook
+│   ├── use-copy.ts             # Clipboard hook
+│   └── use-tool-history.ts     # Recent, pinned, usage tracking hooks
 └── lib/
     ├── utils.ts                # cn() class merge utility
-    ├── tools-config.ts         # Central tool registry (add new tools here)
-    └── valorant-data.ts        # Agent & map data
+    └── tools-config.ts         # Central tool registry (add new tools here)
 ```
 
 ### Adding a New Tool
@@ -245,6 +250,6 @@ See [LICENSE](LICENSE) for the full terms.
 
 **Built with ❤️ by [xgoat-tbh](https://github.com/xgoat-tbh)**
 
-One dashboard. 44 tools. No BS.
+One dashboard. 49 tools. No BS.
 
 </div>

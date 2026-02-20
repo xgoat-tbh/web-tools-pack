@@ -2,7 +2,7 @@
 
 # 🛠️ Web Tools Pack
 
-### 48 free tools. One smart dashboard. Zero data collection.
+### 54 free tools. One smart dashboard. Zero data collection.
 
 Stop bouncing between 20 different websites — format, convert, encode, generate, and more, all from a single tab.
 
@@ -35,14 +35,25 @@ Everything runs **100% in your browser**. Your files and data never leave your m
 
 | | |
 |---|---|
-| 🧰 **48 tools** across 6 categories | 🛡️ **Privacy first** — nothing is uploaded, ever |
+| 🧰 **54 tools** across 7 categories | 🛡️ **Privacy first** — nothing is uploaded, ever |
 | 🌗 **Dark & light mode** with smooth transitions | ⌨️ **Command palette** — press `Ctrl+K` to jump anywhere |
 | 📱 **Responsive** — works on desktop, tablet, mobile | ⚡ **Fast** — static pages, code-split, tiny bundles |
 | 🖱️ **Drag & drop** everywhere — images, files, you name it | 📋 **Copy to clipboard** on every output |
 
 ---
 
-## 📦 All 48 Tools
+## 📦 All 54 Tools
+
+### 🩺 Diagnostics
+
+| Tool | What it does |
+|------|-------------|
+| **One-Click Device Scan** | Full system health check (User Agent, Battery, Screen) |
+| **FPS & Rendering** | Measure frame rate stability & animation smoothness |
+| **Input Latency** | Test mouse click & keyboard input delay |
+| **Network Diagnostics** | Check connection status & API latency |
+| **Browser Fingerprint** | Analyze your unique browser ID & exposure |
+| **Screen Analyzer** | Dead pixel check & refresh rate estimator |
 
 ### 🔧 Dev Tools
 

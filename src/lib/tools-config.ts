@@ -7,6 +7,7 @@ import {
   Laugh, Terminal, DollarSign, Ruler,
   Paintbrush, Square, Keyboard, Coins, ScanSearch, Languages,
   Mouse, Monitor, Gauge, Zap,
+  Activity, Wifi, ScanLine, Smartphone,
 } from "lucide-react"
 
 export interface Tool {
@@ -96,6 +97,18 @@ export const categories: Category[] = [
       { name: "Coin Flip & Dice", slug: "coin-dice", description: "Random decisions with style", icon: Coins, category: "productivity" },
       { name: "AI Content Detector", slug: "ai-detector", description: "Detect AI-generated text patterns", icon: ScanSearch, category: "productivity" },
       { name: "Translator", slug: "translator", description: "Translate text between 100+ languages", icon: Languages, category: "productivity" },
+    ],
+  },
+  {
+    name: "Diagnostics",
+    slug: "diagnostics",
+    tools: [
+      { name: "One-Click Device Scan", slug: "device-scan", description: "Full system health check", icon: Smartphone, category: "diagnostics" },
+      { name: "FPS & Rendering", slug: "fps-test", description: "Measure frame rate stability", icon: Activity, category: "diagnostics" },
+      { name: "Input Latency", slug: "input-test", description: "Test mouse & keyboard delay", icon: Mouse, category: "diagnostics" },
+      { name: "Network Diagnostics", slug: "network-status", description: "Check API latency & speed", icon: Wifi, category: "diagnostics" },
+      { name: "Browser Fingerprint", slug: "fingerprint", description: "Analyze your unique ID", icon: Fingerprint, category: "diagnostics" },
+      { name: "Screen Analyzer", slug: "screen-test", description: "Dead pixel & refresh rate", icon: ScanLine, category: "diagnostics" },
     ],
   },
   {

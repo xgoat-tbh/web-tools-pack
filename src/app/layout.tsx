@@ -8,7 +8,7 @@ import { SecurityShield } from "@/components/security-shield"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Web Tools Pack",
+  title: "ToolHex",
   description: "A modern collection of developer utilities, converters, media tools, and productivity helpers.",
 }
 

@@ -174,7 +174,7 @@ export default function Home() {
       <div className="space-y-2">
         <div className="animate-fade-in-up flex items-center gap-2">
           <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
-            Web Tools Pack
+            ToolHex
           </h1>
           <Sparkles className="h-6 w-6 text-yellow-500 animate-bounce-slow" />
         </div>
@@ -315,7 +315,7 @@ export default function Home() {
           <div className="group relative overflow-hidden rounded-xl border border-pink-500/20 bg-gradient-to-r from-pink-500/5 via-purple-500/5 to-cyan-500/5 p-6 text-center transition-all duration-500 hover:border-pink-500/40 hover:shadow-xl hover:shadow-pink-500/5">
             <div className="absolute inset-0 bg-gradient-to-r from-pink-500/0 via-purple-500/5 to-pink-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
             <Heart className="mx-auto mb-2 h-8 w-8 text-pink-500 transition-transform duration-300 group-hover:scale-125" />
-            <p className="text-lg font-semibold">Enjoying Web Tools Pack?</p>
+            <p className="text-lg font-semibold">Enjoying ToolHex?</p>
             <p className="mt-1 text-sm text-muted-foreground">Support the project — buy us a coffee via UPI!</p>
           </div>
         </Link>

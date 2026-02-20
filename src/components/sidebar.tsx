@@ -31,7 +31,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
         <div className="flex h-14 items-center justify-between border-b px-4">
           <Link href="/" className="group flex items-center gap-2 font-bold text-lg" onClick={onClose}>
             <Wrench className="h-5 w-5 text-primary transition-transform duration-300 group-hover:rotate-90" />
-            <span className="bg-gradient-to-r from-foreground to-foreground bg-clip-text transition-all duration-300 group-hover:from-primary group-hover:to-purple-400 group-hover:text-transparent">Web Tools Pack</span>
+            <span className="bg-gradient-to-r from-foreground to-foreground bg-clip-text transition-all duration-300 group-hover:from-primary group-hover:to-purple-400 group-hover:text-transparent">ToolHex</span>
           </Link>
           <button className="lg:hidden" onClick={onClose}>
             <ChevronLeft className="h-5 w-5" />

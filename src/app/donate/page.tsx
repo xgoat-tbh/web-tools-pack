@@ -126,8 +126,8 @@ export default function DonatePage() {
 
         <p className="animate-fade-in-up animation-delay-200 mx-auto mt-4 max-w-lg text-lg text-muted-foreground">
           {isInternational
-            ? "Web Tools Pack is free for everyone, everywhere. Here's how you can help from abroad!"
-            : "Web Tools Pack is free & open source. Your support keeps the tools running and motivates new features!"}
+            ? "ToolHex is free for everyone, everywhere. Here's how you can help from abroad!"
+            : "ToolHex is free & open source. Your support keeps the tools running and motivates new features!"}
         </p>
 
         {/* Region indicator + manual toggle */}
@@ -329,7 +329,7 @@ export default function DonatePage() {
             <button
               onClick={() => {
                 if (navigator.share) {
-                  navigator.share({ title: "Web Tools Pack", text: "44+ free browser tools — no sign-up, no tracking!", url: "https://web-tools-pack.vercel.app" })
+                  navigator.share({ title: "ToolHex", text: "49 free browser tools — no sign-up, no tracking!", url: "https://web-tools-pack.vercel.app" })
                 } else {
                   navigator.clipboard.writeText("https://web-tools-pack.vercel.app")
                 }
@@ -453,7 +453,7 @@ export default function DonatePage() {
               </div>
               <h3 className="text-lg font-semibold">No donations yet</h3>
               <p className="mt-1 max-w-xs text-sm text-muted-foreground">
-                Be the first to support Web Tools Pack! Scan the QR code above or copy the UPI ID.
+                Be the first to support ToolHex! Scan the QR code above or copy the UPI ID.
               </p>
             </div>
           </Card>

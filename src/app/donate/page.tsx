@@ -86,7 +86,7 @@ export default function DonatePage() {
     const canvas = canvasRef.current
     if (!canvas) return
 
-    const upiURL = `upi://pay?pa=${UPI_ID}&pn=WebToolsPack&cu=INR&am=${amount}`
+    const upiURL = `upi://pay?pa=${UPI_ID}&pn=ToolHex&cu=INR&am=${amount}`
 
     await QRCode.toCanvas(canvas, upiURL, {
       width: 280,

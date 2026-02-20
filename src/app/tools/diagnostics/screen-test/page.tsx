@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
-import { ScanLine, Monitor, Maximize, X } from "lucide-react"
+import { ScanLine, Monitor, Maximize, X, Zap } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 
 const COLORS = [

@@ -195,19 +195,19 @@ function LanguageSelector({
       </button>
 
       {open && (
-        <div className="absolute z-50 mt-1 w-full rounded-lg border border-border bg-popover shadow-xl max-h-[320px] overflow-hidden animate-in fade-in-0 zoom-in-95">
-          <div className="p-2 border-b border-border">
+        <div className="absolute z-50 mt-1 w-full rounded-lg border border-border bg-zinc-950 shadow-xl max-h-[320px] overflow-hidden animate-in fade-in-0 zoom-in-95">
+          <div className="p-2 border-b border-border bg-zinc-950">
             <input
               type="text"
               placeholder="Search languages..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full rounded-md border border-border bg-background px-3 py-1.5 text-sm outline-none focus:border-primary/50"
+              className="w-full rounded-md border border-border bg-zinc-900 px-3 py-1.5 text-sm outline-none focus:border-primary/50"
               autoFocus
             />
           </div>
 
-          <div className="overflow-y-auto max-h-[260px] p-1">
+          <div className="overflow-y-auto max-h-[260px] p-1 bg-zinc-950">
             {/* Popular section (only when not searching) */}
             {!search && popular.length > 0 && (
               <>
@@ -281,55 +281,33 @@ export default function TranslatorPage() {
     setDetectedLang("")
 
     try {
-      // Use MyMemory Translation API (free, no key required, 5000 chars/day generous limit)
-      const sl = sourceLang === "auto" ? "autodetect" : sourceLang
+      // Google Translate API (free endpoint)
+      const sl = sourceLang === "auto" ? "auto" : sourceLang
       const tl = targetLang
 
-      const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text.slice(0, 5000))}&langpair=${sl}|${tl}&de=webtoolspack@email.com`
+      const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sl}&tl=${tl}&dt=t&dt=ld&q=${encodeURIComponent(text.slice(0, 5000))}`
 
       const res = await fetch(url)
       if (!res.ok) throw new Error("Translation service unavailable")
 
       const data = await res.json()
 
-      if (data.responseStatus === 200 || data.responseStatus === "200") {
-        const translated = data.responseData?.translatedText || ""
-        // MyMemory returns uppercase when it can't translate — detect that
-        if (translated === text.toUpperCase() && text !== text.toUpperCase()) {
-          setTranslatedText(translated)
-          setError("Translation may be inaccurate for this language pair")
-        } else {
-          setTranslatedText(translated)
-        }
+      // data[0] contains translation segments: [["translated", "source", ...], ...]
+      if (data && data[0]) {
+        const translated = data[0]
+          .filter((seg: unknown[]) => seg && seg[0])
+          .map((seg: unknown[]) => seg[0])
+          .join("")
+        setTranslatedText(translated)
 
-        // Detected language
-        if (sourceLang === "auto" && data.responseData?.detectedLanguage) {
-          const dl = data.responseData.detectedLanguage
+        // Detected language from Google
+        if (sourceLang === "auto" && data[2]) {
+          const dl = data[2] as string
           const langName = LANGUAGES.find((l) => l.code === dl)?.name || dl
           setDetectedLang(langName)
         }
       } else {
-        // Fallback: try LibreTranslate mirror
-        const libreRes = await fetch("https://libretranslate.com/translate", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            q: text.slice(0, 5000),
-            source: sourceLang === "auto" ? "auto" : sourceLang,
-            target: targetLang,
-            format: "text",
-          }),
-        })
-        if (libreRes.ok) {
-          const libreData = await libreRes.json()
-          setTranslatedText(libreData.translatedText || "")
-          if (libreData.detectedLanguage?.language) {
-            const dl = libreData.detectedLanguage.language
-            setDetectedLang(LANGUAGES.find((l) => l.code === dl)?.name || dl)
-          }
-        } else {
-          throw new Error("Translation failed")
-        }
+        throw new Error("No translation returned")
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Translation failed. Please try again.")
@@ -519,7 +497,7 @@ export default function TranslatorPage() {
       {/* Info */}
       <div className="rounded-lg border border-border/50 bg-muted/30 p-3 text-center">
         <p className="text-[10px] text-muted-foreground">
-          Powered by MyMemory API &bull; Up to 5,000 characters per translation &bull;
+          Powered by Google Translate &bull; Up to 5,000 characters per translation &bull;
           Text-to-speech uses your browser&apos;s built-in speech synthesis
         </p>
       </div>

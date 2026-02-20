@@ -6,7 +6,7 @@ import {
   Timer, StickyNote, Type, PenTool, CheckSquare,
   Laugh, Terminal, DollarSign, Ruler,
   Paintbrush, Square, Keyboard, Coins, ScanSearch, Languages,
-  Mouse, Smartphone, Monitor, Gauge, Zap,
+  Mouse, Monitor, Gauge, Zap,
 } from "lucide-react"
 
 export interface Tool {
@@ -105,7 +105,6 @@ export const categories: Category[] = [
       { name: "CPS Benchmark", slug: "cps-test", description: "Test your clicks per second", icon: Mouse, category: "benchmarks" },
       { name: "Reaction Time Test", slug: "reaction-test", description: "Test your reaction speed", icon: Zap, category: "benchmarks" },
       { name: "Keyboard Key Checker", slug: "keyboard-test", description: "Check if all your keys work", icon: Keyboard, category: "benchmarks" },
-      { name: "Touch Latency Test", slug: "touch-latency", description: "Measure reaction & touch latency", icon: Smartphone, category: "benchmarks" },
       { name: "Browser Performance", slug: "browser-perf", description: "Stress-test your browser rendering", icon: Monitor, category: "benchmarks" },
     ],
   },

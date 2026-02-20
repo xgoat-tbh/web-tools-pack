@@ -2,7 +2,7 @@
 
 # 🛠️ Web Tools Pack
 
-### 49 free tools. One smart dashboard. Zero data collection.
+### 48 free tools. One smart dashboard. Zero data collection.
 
 Stop bouncing between 20 different websites — format, convert, encode, generate, and more, all from a single tab.
 
@@ -35,14 +35,14 @@ Everything runs **100% in your browser**. Your files and data never leave your m
 
 | | |
 |---|---|
-| 🧰 **49 tools** across 6 categories | 🛡️ **Privacy first** — nothing is uploaded, ever |
+| 🧰 **48 tools** across 6 categories | 🛡️ **Privacy first** — nothing is uploaded, ever |
 | 🌗 **Dark & light mode** with smooth transitions | ⌨️ **Command palette** — press `Ctrl+K` to jump anywhere |
 | 📱 **Responsive** — works on desktop, tablet, mobile | ⚡ **Fast** — static pages, code-split, tiny bundles |
 | 🖱️ **Drag & drop** everywhere — images, files, you name it | 📋 **Copy to clipboard** on every output |
 
 ---
 
-## 📦 All 49 Tools
+## 📦 All 48 Tools
 
 ### 🔧 Dev Tools
 
@@ -120,7 +120,6 @@ Everything runs **100% in your browser**. Your files and data never leave your m
 | **CPS Benchmark** | Test your clicks per second with multiple durations |
 | **Reaction Time Test** | Visual reaction speed test across 5 rounds |
 | **Keyboard Key Checker** | Check if all your keyboard keys are working (PC only) |
-| **Touch Latency Test** | Reaction-time tap test with per-round results |
 | **Browser Performance** | Canvas particle stress test with FPS scoring |
 
 ---
@@ -250,6 +249,6 @@ See [LICENSE](LICENSE) for the full terms.
 
 **Built with ❤️ by [xgoat-tbh](https://github.com/xgoat-tbh)**
 
-One dashboard. 49 tools. No BS.
+One dashboard. 48 tools. No BS.
 
 </div>

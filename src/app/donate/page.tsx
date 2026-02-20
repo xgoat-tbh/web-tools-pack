@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { Heart, Sparkles, Coffee, Star, Zap, Gift, Users, Crown, TrendingUp, Globe, ArrowRight, Github, MapPin } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -56,6 +56,7 @@ export default function DonatePage() {
   const [qrReady, setQrReady] = useState(false)
   const [showHearts, setShowHearts] = useState(false)
   const [hovered, setHovered] = useState(false)
+  const [selectedAmount, setSelectedAmount] = useState<number>(10) // Default to ₹10 (minimum)
   const [region, setRegion] = useState<Region>("loading")
   const [detectedCountry, setDetectedCountry] = useState<string>("")
 
@@ -79,13 +80,13 @@ export default function DonatePage() {
   const isIndia = region === "india"
   const isInternational = region === "international"
 
-  // Generate QR code for a fixed ₹10 amount
-  const generateQR = async () => {
+  // Generate QR code with specified amount (defaults to ₹10 minimum)
+  const generateQR = useCallback(async (amount: number = 10) => {
     const QRCode = (await import("qrcode")).default
     const canvas = canvasRef.current
     if (!canvas) return
 
-    const upiURL = `upi://pay?pa=${UPI_ID}&pn=WebToolsPack&cu=INR&am=10`
+    const upiURL = `upi://pay?pa=${UPI_ID}&pn=WebToolsPack&cu=INR&am=${amount}`
 
     await QRCode.toCanvas(canvas, upiURL, {
       width: 280,
@@ -97,11 +98,11 @@ export default function DonatePage() {
       errorCorrectionLevel: "H",
     })
     setQrReady(true)
-  }
+  }, [])
 
   useEffect(() => {
-    if (isIndia) generateQR()
-  }, [region])
+    if (isIndia) generateQR(selectedAmount)
+  }, [isIndia, selectedAmount, generateQR])
 
   const amounts = [10, 49, 99, 199, 499, 999]
 
@@ -174,7 +175,9 @@ export default function DonatePage() {
 
             <div className="relative text-center">
               <p className="mb-1 text-sm font-medium text-muted-foreground">Scan to Pay via UPI</p>
-              <p className="mb-1 text-xs font-semibold text-pink-400 animate-fade-in-up">Fixed amount: ₹10</p>
+              {selectedAmount && (
+                <p className="mb-1 text-xs font-semibold text-pink-400 animate-fade-in-up">Amount: ₹{selectedAmount}</p>
+              )}
               <div className="relative mx-auto mb-4 inline-block">
                 {/* QR glow ring */}
                 <div className={`absolute -inset-4 rounded-2xl bg-gradient-to-br from-pink-500/20 via-purple-500/20 to-cyan-500/20 blur-xl transition-opacity duration-700 ${hovered ? "opacity-100" : "opacity-0"}`} />
@@ -216,8 +219,27 @@ export default function DonatePage() {
         <div className="w-full max-w-sm space-y-6">
           {/* Quick amounts */}
           <div className="animate-fade-in-up animation-delay-400">
-            <p className="mb-1 text-sm font-medium text-muted-foreground">UPI QR is locked to</p>
-            <p className="text-xl font-bold text-pink-400">₹10</p>
+            <p className="mb-3 text-sm font-medium text-muted-foreground">Select amount (minimum ₹10)</p>
+            <div className="grid grid-cols-3 gap-2">
+              {amounts.map((amount) => (
+                <button
+                  key={amount}
+                  onClick={() => {
+                    setSelectedAmount(amount)
+                    generateQR(amount)
+                  }}
+                  className={`animate-scale-in group relative overflow-hidden rounded-lg border px-3 py-3 text-center transition-all duration-300 hover:-translate-y-0.5 hover:border-pink-500/40 hover:shadow-lg hover:shadow-pink-500/10 ${
+                    selectedAmount === amount
+                      ? "border-pink-500/60 bg-pink-500/10 shadow-lg shadow-pink-500/10"
+                      : "border-border/60 bg-card"
+                  }`}
+                  style={{ animationDelay: `${0.5 + amounts.indexOf(amount) * 0.05}s` }}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-pink-500/0 to-purple-500/0 transition-all duration-300 group-hover:from-pink-500/10 group-hover:to-purple-500/10" />
+                  <span className="relative text-lg font-bold">₹{amount}</span>
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Perks */}

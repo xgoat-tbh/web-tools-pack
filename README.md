@@ -42,7 +42,7 @@ Everything runs **100% in your browser**. Your files and data never leave your m
 
 ---
 
-## 📦 All 54 Tools
+## 📦 All 49 Tools
 
 
 ### 🔧 Dev Tools

@@ -25,7 +25,7 @@ Stop bouncing between 20 different websites — format, convert, encode, generat
 
 ## 🖥️ Try It
 
-Head over to **[web-tools-pack.vercel.app](https://web-tools-pack.vercel.app)** — no sign-up, no tracking, works on any device.
+Head over to **[toolhex.vercel.app](https://web-tools-pack.vercel.app)** — no sign-up, no tracking, works on any device.
 
 Everything runs **100% in your browser**. Your files and data never leave your machine.
 
@@ -233,7 +233,7 @@ If you find this useful, consider supporting the project:
 This project is **source-available** — not open source.
 
 You **can**:
-- ✅ Use the live site freely at [web-tools-pack.vercel.app](https://web-tools-pack.vercel.app)
+- ✅ Use the live site freely at [toolhex.app](https://web-tools-pack.vercel.app)
 - ✅ Clone and run locally for personal use or learning
 - ✅ Contribute to this repository via pull requests
 - ✅ Reference the code for educational purposes

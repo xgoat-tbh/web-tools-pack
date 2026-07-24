@@ -1,0 +1,16 @@
+/**
+ * Render.dev Blueprint for yt-dlp + ffmpeg backend service
+ */
+services:
+  - type: web
+    name: yt-dlp-backend
+    env: docker
+    dockerfilePath: server/Dockerfile
+    dockerContext: server
+    plan: free
+    region: oregon
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: PORT
+        value: 10000

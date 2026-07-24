@@ -1,10 +1,11 @@
 import { NextRequest } from "next/server"
 
-export const runtime = "edge"
+const BACKEND_URL = process.env.YT_DLP_BACKEND_URL || "http://localhost:3001"
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const mediaUrl = searchParams.get("url")
+  const format = searchParams.get("format") || "bv*+ba/b"
   const filename = searchParams.get("filename") || "download.mp4"
 
   if (!mediaUrl) {
@@ -15,60 +16,39 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Fetch the media file server-side (bypasses CORS)
-    const upstream = await fetch(mediaUrl, {
-      headers: {
-        "User-Agent":
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
-      },
-      signal: AbortSignal.timeout(25000),
+    // Proxy to yt-dlp backend download endpoint
+    const backendUrl = `${BACKEND_URL}/api/download?url=${encodeURIComponent(mediaUrl)}&format=${encodeURIComponent(format)}&filename=${encodeURIComponent(filename)}`
+
+    const upstream = await fetch(backendUrl, {
+      signal: AbortSignal.timeout(300000), // 5 min timeout for large files
     })
 
     if (!upstream.ok) {
-      return new Response(
-        JSON.stringify({ error: `Upstream responded with ${upstream.status}` }),
-        { status: 502, headers: { "Content-Type": "application/json" } }
-      )
+      const errText = await upstream.text()
+      return new Response(errText, {
+        status: upstream.status,
+        headers: { "Content-Type": "application/json" },
+      })
     }
 
-    // Determine content type
-    const contentType =
-      upstream.headers.get("Content-Type") || "application/octet-stream"
-    const contentLength = upstream.headers.get("Content-Length")
-
-    // Build response headers for download
+    // Stream the response through
     const headers: Record<string, string> = {
-      "Content-Type": contentType,
+      "Content-Type": upstream.headers.get("Content-Type") || "application/octet-stream",
       "Content-Disposition": `attachment; filename="${encodeURIComponent(filename)}"`,
       "Cache-Control": "no-cache",
     }
 
+    const contentLength = upstream.headers.get("Content-Length")
     if (contentLength) {
       headers["Content-Length"] = contentLength
     }
 
-    // Stream the response body through to the client
-    return new Response(upstream.body, {
-      status: 200,
-      headers,
-    })
+    return new Response(upstream.body, { status: 200, headers })
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Download proxy failed"
-
-    // If it's a timeout, return a special response
-    if (message.includes("timed out") || message.includes("abort")) {
-      return new Response(
-        JSON.stringify({
-          error: "Download timed out. Try the direct download link instead.",
-          fallback: mediaUrl,
-        }),
-        { status: 504, headers: { "Content-Type": "application/json" } }
-      )
-    }
-
-    return new Response(JSON.stringify({ error: message }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    })
+    return new Response(
+      JSON.stringify({ error: message }),
+      { status: 502, headers: { "Content-Type": "application/json" } }
+    )
   }
 }

@@ -22,6 +22,9 @@ import {
   Trash2,
   Link,
   Search,
+  HardDrive,
+  User,
+  Eye,
 } from "lucide-react"
 
 const currentTool = allTools.find((t) => t.slug === "video-downloader")!
@@ -29,10 +32,17 @@ const currentTool = allTools.find((t) => t.slug === "video-downloader")!
 // ── Types ──
 
 interface VideoFormat {
+  id: string
   label: string
+  qualityLabel: string
   type: "video" | "audio"
-  url: string
-  extension: string
+  ext: string
+  height?: number | null
+  abr?: number | null
+  filesize?: number | null
+  filesizeLabel?: string | null
+  isBest?: boolean
+  needsConversion?: boolean
 }
 
 interface VideoMeta {
@@ -41,6 +51,11 @@ interface VideoMeta {
   title: string
   thumbnail: string | null
   duration: string | null
+  durationSeconds: number | null
+  uploader: string | null
+  uploaderUrl: string | null
+  viewCount: number | null
+  uploadDate: string | null
   formats: VideoFormat[]
   error?: string
   originalUrl: string
@@ -50,22 +65,23 @@ interface DownloadHistoryItem {
   title: string
   platform: string
   type: "video" | "audio"
+  quality: string
   timestamp: number
 }
 
 // ── Platform styling ──
 
-function getPlatformStyle(platform: string): { color: string; bg: string } {
+function getPlatformStyle(platform: string): { color: string; bg: string; border: string } {
   switch (platform) {
-    case "YouTube": return { color: "text-red-400", bg: "bg-red-500/10" }
-    case "Instagram": return { color: "text-pink-400", bg: "bg-pink-500/10" }
-    case "TikTok": return { color: "text-cyan-400", bg: "bg-cyan-500/10" }
-    case "Twitter / X": return { color: "text-blue-400", bg: "bg-blue-500/10" }
-    case "Facebook": return { color: "text-blue-500", bg: "bg-blue-600/10" }
-    case "Vimeo": return { color: "text-sky-400", bg: "bg-sky-500/10" }
-    case "Reddit": return { color: "text-orange-400", bg: "bg-orange-500/10" }
-    case "SoundCloud": return { color: "text-amber-400", bg: "bg-amber-500/10" }
-    default: return { color: "text-primary", bg: "bg-primary/10" }
+    case "YouTube": return { color: "text-red-400", bg: "bg-red-500/10", border: "border-red-500/20" }
+    case "Instagram": return { color: "text-pink-400", bg: "bg-pink-500/10", border: "border-pink-500/20" }
+    case "TikTok": return { color: "text-cyan-400", bg: "bg-cyan-500/10", border: "border-cyan-500/20" }
+    case "Twitter / X": return { color: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/20" }
+    case "Facebook": return { color: "text-blue-500", bg: "bg-blue-600/10", border: "border-blue-600/20" }
+    case "Vimeo": return { color: "text-sky-400", bg: "bg-sky-500/10", border: "border-sky-500/20" }
+    case "Reddit": return { color: "text-orange-400", bg: "bg-orange-500/10", border: "border-orange-500/20" }
+    case "SoundCloud": return { color: "text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/20" }
+    default: return { color: "text-primary", bg: "bg-primary/10", border: "border-primary/20" }
   }
 }
 
@@ -76,79 +92,67 @@ function extractYouTubeId(url: string): string | null {
   return match ? match[1] : null
 }
 
-// ── LocalStorage helpers for download history ──
+function formatViewCount(count: number | null): string | null {
+  if (!count) return null
+  if (count >= 1_000_000) return `${(count / 1_000_000).toFixed(1)}M views`
+  if (count >= 1_000) return `${(count / 1_000).toFixed(1)}K views`
+  return `${count} views`
+}
+
+// ── LocalStorage helpers ──
 
 const HISTORY_KEY = "toolhex_video_download_history"
-const MAX_HISTORY = 10
+const MAX_HISTORY = 15
 
 function getHistory(): DownloadHistoryItem[] {
   if (typeof window === "undefined") return []
-  try {
-    return JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]")
-  } catch {
-    return []
-  }
+  try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]") }
+  catch { return [] }
 }
 
 function addToHistory(item: Omit<DownloadHistoryItem, "timestamp">) {
   const history = getHistory()
   history.unshift({ ...item, timestamp: Date.now() })
-  localStorage.setItem(
-    HISTORY_KEY,
-    JSON.stringify(history.slice(0, MAX_HISTORY))
-  )
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(0, MAX_HISTORY)))
 }
 
-function clearHistory() {
-  localStorage.removeItem(HISTORY_KEY)
-}
-
-// ── Phases ──
-
-type Phase = "idle" | "analyzing" | "ready" | "downloading" | "error"
+function clearHistory() { localStorage.removeItem(HISTORY_KEY) }
 
 // ── Component ──
+
+type Phase = "idle" | "analyzing" | "ready" | "error"
 
 export default function VideoDownloaderPage() {
   const [url, setUrl] = useState("")
   const [phase, setPhase] = useState<Phase>("idle")
   const [meta, setMeta] = useState<VideoMeta | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [downloadingLabel, setDownloadingLabel] = useState<string | null>(null)
+  const [selectedFormat, setSelectedFormat] = useState<string | null>(null)
+  const [downloadingId, setDownloadingId] = useState<string | null>(null)
   const [downloadSuccess, setDownloadSuccess] = useState<string | null>(null)
   const [history, setHistory] = useState<DownloadHistoryItem[]>([])
   const inputRef = useRef<HTMLInputElement>(null)
 
-  // Load history on mount
-  useEffect(() => {
-    setHistory(getHistory())
-  }, [])
+  useEffect(() => { setHistory(getHistory()) }, [])
 
   // ── URL Validation ──
   const isValidUrl = useCallback((value: string): boolean => {
     try {
       const parsed = new URL(value.trim())
       return ["http:", "https:"].includes(parsed.protocol)
-    } catch {
-      return false
-    }
+    } catch { return false }
   }, [])
 
   // ── Fetch Video Info ──
   const fetchInfo = useCallback(async (inputUrl?: string) => {
     const target = (inputUrl || url).trim()
-    if (!target) {
-      setError("Please paste a video link")
-      return
-    }
-    if (!isValidUrl(target)) {
-      setError("That doesn't look like a valid URL. Make sure it starts with https://")
-      return
-    }
+    if (!target) { setError("Please paste a video link"); return }
+    if (!isValidUrl(target)) { setError("Invalid URL — make sure it starts with https://"); return }
 
     setPhase("analyzing")
     setError(null)
     setMeta(null)
+    setSelectedFormat(null)
     setDownloadSuccess(null)
 
     try {
@@ -160,129 +164,86 @@ export default function VideoDownloaderPage() {
 
       const data: VideoMeta = await res.json()
 
-      if (data.status === "error" || data.formats.length === 0) {
-        setError(
-          data.error ||
-          "Could not extract download links. The video may be private, age-restricted, or unsupported."
-        )
+      if (data.status === "error" || !data.formats?.length) {
+        setError(data.error || "Could not extract video info. The URL may be private, age-restricted, or unsupported.")
         setPhase("error")
         return
       }
 
       setMeta(data)
+      setSelectedFormat(data.formats[0]?.id || null) // Default to best quality
       setPhase("ready")
     } catch {
-      setError("Failed to connect to the server. Please check your internet and try again.")
+      setError("Failed to connect to the extraction server. Please try again.")
       setPhase("error")
     }
   }, [url, isValidUrl])
 
   // ── Auto-detect pasted URL ──
-  const handlePaste = useCallback(
-    (e: React.ClipboardEvent<HTMLInputElement>) => {
-      const pasted = e.clipboardData.getData("text").trim()
-      if (isValidUrl(pasted)) {
-        setUrl(pasted)
-        // Small delay to let React update state
-        setTimeout(() => fetchInfo(pasted), 100)
-      }
-    },
-    [fetchInfo, isValidUrl]
-  )
+  const handlePaste = useCallback((e: React.ClipboardEvent<HTMLInputElement>) => {
+    const pasted = e.clipboardData.getData("text").trim()
+    if (isValidUrl(pasted)) {
+      setUrl(pasted)
+      setTimeout(() => fetchInfo(pasted), 100)
+    }
+  }, [fetchInfo, isValidUrl])
 
   // ── Download handler ──
-  const triggerDownload = useCallback(
-    async (format: VideoFormat) => {
-      if (!meta) return
-      setDownloadingLabel(format.label)
-      setError(null)
-      setDownloadSuccess(null)
+  const triggerDownload = useCallback(async () => {
+    if (!meta || !selectedFormat) return
 
-      const safeTitle = meta.title
-        .replace(/[^a-zA-Z0-9\s-_]/g, "")
-        .replace(/\s+/g, "_")
-        .slice(0, 60)
-      const filename = `${safeTitle}_${format.type}.${format.extension}`
+    const fmt = meta.formats.find((f) => f.id === selectedFormat)
+    if (!fmt) return
 
-      try {
-        // Try the streaming proxy first
-        const proxyUrl = `/api/video/download?url=${encodeURIComponent(format.url)}&filename=${encodeURIComponent(filename)}`
-        const res = await fetch(proxyUrl)
+    setDownloadingId(fmt.id)
+    setError(null)
+    setDownloadSuccess(null)
 
-        if (res.ok) {
-          const blob = await res.blob()
-          const blobUrl = URL.createObjectURL(blob)
-          const a = document.createElement("a")
-          a.href = blobUrl
-          a.download = filename
-          document.body.appendChild(a)
-          a.click()
-          document.body.removeChild(a)
-          URL.revokeObjectURL(blobUrl)
+    const safeTitle = meta.title.replace(/[^a-zA-Z0-9\s\-_]/g, "").replace(/\s+/g, "_").slice(0, 60)
+    const ext = fmt.needsConversion ? "mp3" : fmt.ext
+    const filename = `${safeTitle}.${ext}`
 
-          // Record in history
-          addToHistory({
-            title: meta.title,
-            platform: meta.platform,
-            type: format.type,
-          })
-          setHistory(getHistory())
-          setDownloadSuccess(format.label)
-          return
-        }
+    try {
+      const proxyUrl = `/api/video/download?url=${encodeURIComponent(meta.originalUrl)}&format=${encodeURIComponent(fmt.id)}&filename=${encodeURIComponent(filename)}`
+      const res = await fetch(proxyUrl)
 
-        // If proxy failed (e.g., timeout), try the JSON error response
-        let fallbackUrl = format.url
-        try {
-          const errData = await res.json()
-          if (errData.fallback) fallbackUrl = errData.fallback
-        } catch {
-          // ignore JSON parse errors
-        }
-
-        // Fallback: open direct URL in new tab
-        const a = document.createElement("a")
-        a.href = fallbackUrl
-        a.download = filename
-        a.target = "_blank"
-        a.rel = "noopener noreferrer"
-        document.body.appendChild(a)
-        a.click()
-        document.body.removeChild(a)
-
-        addToHistory({
-          title: meta.title,
-          platform: meta.platform,
-          type: format.type,
-        })
-        setHistory(getHistory())
-        setDownloadSuccess(format.label)
-      } catch {
-        // Last resort: open the URL directly
-        window.open(format.url, "_blank", "noopener,noreferrer")
-        setError("Proxy download failed. Opening in new tab — use right-click → Save As.")
-      } finally {
-        setDownloadingLabel(null)
+      if (!res.ok) {
+        const errData = await res.json().catch(() => null)
+        throw new Error(errData?.error || `Download failed with status ${res.status}`)
       }
-    },
-    [meta]
-  )
+
+      const blob = await res.blob()
+      const blobUrl = URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = blobUrl
+      a.download = filename
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(blobUrl)
+
+      addToHistory({ title: meta.title, platform: meta.platform, type: fmt.type, quality: fmt.qualityLabel })
+      setHistory(getHistory())
+      setDownloadSuccess(fmt.id)
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Download failed"
+      setError(message)
+    } finally {
+      setDownloadingId(null)
+    }
+  }, [meta, selectedFormat])
 
   // ── Reset ──
   const handleReset = () => {
-    setUrl("")
-    setPhase("idle")
-    setMeta(null)
-    setError(null)
-    setDownloadingLabel(null)
-    setDownloadSuccess(null)
+    setUrl(""); setPhase("idle"); setMeta(null); setError(null)
+    setSelectedFormat(null); setDownloadingId(null); setDownloadSuccess(null)
     inputRef.current?.focus()
   }
 
-  // ── YouTube ID for embed ──
   const ytId = meta?.originalUrl ? extractYouTubeId(meta.originalUrl) : null
+  const videoFormats = meta?.formats.filter((f) => f.type === "video") || []
+  const audioFormats = meta?.formats.filter((f) => f.type === "audio") || []
 
-  // ── Platform badges ──
   const supportedPlatforms = [
     { name: "YouTube", color: "text-red-400" },
     { name: "Instagram", color: "text-pink-400" },
@@ -291,9 +252,9 @@ export default function VideoDownloaderPage() {
     { name: "Facebook", color: "text-blue-500" },
     { name: "Reddit", color: "text-orange-400" },
     { name: "Vimeo", color: "text-sky-400" },
-    { name: "Pinterest", color: "text-red-500" },
     { name: "SoundCloud", color: "text-amber-400" },
     { name: "Dailymotion", color: "text-blue-300" },
+    { name: "1000+ sites", color: "text-green-400" },
   ]
 
   return (
@@ -307,7 +268,7 @@ export default function VideoDownloaderPage() {
           Universal Video & Audio Downloader
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Paste any link — share URLs, direct links, Shorts, Reels, TikToks — and download video or audio directly to your device.
+          Powered by <span className="font-semibold text-foreground">yt-dlp</span> + <span className="font-semibold text-foreground">ffmpeg</span> — supports 1000+ websites. Paste any link and download in any quality.
         </p>
       </div>
 
@@ -327,7 +288,7 @@ export default function VideoDownloaderPage() {
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
                 onPaste={handlePaste}
-                placeholder="https://youtu.be/... or any video link"
+                placeholder="https://youtu.be/... or any video URL"
                 className="h-12 text-sm pr-10"
                 onKeyDown={(e) => e.key === "Enter" && fetchInfo()}
                 disabled={phase === "analyzing"}
@@ -348,23 +309,19 @@ export default function VideoDownloaderPage() {
               className="h-12 px-6 gap-2 text-sm font-semibold shrink-0"
             >
               {phase === "analyzing" ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" /> Analyzing...
-                </>
+                <><Loader2 className="h-4 w-4 animate-spin" /> Analyzing...</>
               ) : (
-                <>
-                  <Search className="h-4 w-4" /> Fetch Video
-                </>
+                <><Search className="h-4 w-4" /> Fetch Video</>
               )}
             </Button>
           </div>
 
-          {/* Error display */}
+          {/* Error */}
           {error && (
             <div className="flex items-start gap-2 text-xs text-red-400 bg-red-500/10 p-3 rounded-lg border border-red-500/20">
               <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
               <div>
-                <p className="font-medium">Something went wrong</p>
+                <p className="font-medium">Error</p>
                 <p className="mt-0.5 opacity-90">{error}</p>
               </div>
             </div>
@@ -375,8 +332,8 @@ export default function VideoDownloaderPage() {
             <div className="flex items-center gap-3 text-sm text-muted-foreground bg-muted/50 p-4 rounded-xl border animate-pulse">
               <Loader2 className="h-5 w-5 animate-spin text-primary" />
               <div>
-                <p className="font-medium text-foreground">Analyzing link...</p>
-                <p className="text-xs mt-0.5">Resolving share URL, extracting metadata, finding download streams</p>
+                <p className="font-medium text-foreground">Extracting video information...</p>
+                <p className="text-xs mt-0.5">Running yt-dlp — resolving URL, fetching metadata & available formats</p>
               </div>
             </div>
           )}
@@ -385,10 +342,7 @@ export default function VideoDownloaderPage() {
           <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-muted-foreground pt-1">
             <span className="font-semibold text-foreground text-xs mr-1">Supported:</span>
             {supportedPlatforms.map((p) => (
-              <span
-                key={p.name}
-                className={`rounded-full bg-muted px-2.5 py-0.5 ${p.color} font-medium`}
-              >
+              <span key={p.name} className={`rounded-full bg-muted px-2.5 py-0.5 ${p.color} font-medium`}>
                 {p.name}
               </span>
             ))}
@@ -402,21 +356,17 @@ export default function VideoDownloaderPage() {
           <CardHeader className="pb-3">
             <CardTitle className="text-base font-semibold flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-yellow-500" />
-              <span>
-                Ready to Download
-                <span className={`ml-2 text-sm font-normal ${getPlatformStyle(meta.platform).color}`}>
-                  — {meta.platform}
-                </span>
+              Ready to Download
+              <span className={`text-sm font-normal ml-1 ${getPlatformStyle(meta.platform).color}`}>
+                — {meta.platform}
               </span>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="grid md:grid-cols-12 gap-6 items-start">
-              {/* ── Left: Preview ── */}
-              <div className="md:col-span-6 space-y-3">
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-                  <Play className="h-3 w-3" /> Live Preview
-                </p>
+            {/* ── Preview + Meta ── */}
+            <div className="grid md:grid-cols-12 gap-5">
+              {/* Thumbnail / Embed */}
+              <div className="md:col-span-5">
                 <div className="relative aspect-video w-full rounded-xl bg-black overflow-hidden border shadow-lg">
                   {ytId ? (
                     <iframe
@@ -429,11 +379,7 @@ export default function VideoDownloaderPage() {
                   ) : meta.thumbnail ? (
                     <div className="relative w-full h-full group">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={meta.thumbnail}
-                        alt={meta.title}
-                        className="w-full h-full object-cover"
-                      />
+                      <img src={meta.thumbnail} alt={meta.title} className="w-full h-full object-cover" />
                       <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                         <div className="p-3 rounded-full bg-white/20 backdrop-blur-sm">
                           <Play className="h-8 w-8 text-white fill-white" />
@@ -441,126 +387,164 @@ export default function VideoDownloaderPage() {
                       </div>
                     </div>
                   ) : (
-                    <div className="flex flex-col items-center justify-center h-full p-4 text-center text-muted-foreground">
+                    <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground">
                       <ImageIcon className="h-10 w-10 mb-2 opacity-40 text-primary" />
                       <p className="text-xs font-medium">Preview unavailable</p>
-                      <p className="text-[10px] opacity-75 mt-1">
-                        Download is still available below
-                      </p>
                     </div>
                   )}
                 </div>
-
-                {/* Video title */}
-                <div className="space-y-1">
-                  <p className="text-sm font-semibold leading-snug line-clamp-2">
-                    {meta.title}
-                  </p>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <span
-                      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase ${getPlatformStyle(meta.platform).bg} ${getPlatformStyle(meta.platform).color}`}
-                    >
-                      {meta.platform}
-                    </span>
-                    {meta.duration && (
-                      <span className="flex items-center gap-1">
-                        <Clock className="h-3 w-3" /> {meta.duration}
-                      </span>
-                    )}
-                  </div>
-                </div>
               </div>
 
-              {/* ── Right: Download Options ── */}
-              <div className="md:col-span-6 space-y-3">
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-                  <Download className="h-3 w-3" /> Download Options
-                </p>
+              {/* Video info */}
+              <div className="md:col-span-7 space-y-3">
+                <h2 className="text-sm font-bold leading-snug line-clamp-2">{meta.title}</h2>
 
-                <div className="space-y-2.5">
-                  {meta.formats.map((fmt, idx) => {
-                    const isBusy = downloadingLabel === fmt.label
-                    const isDone = downloadSuccess === fmt.label
-                    const isAudio = fmt.type === "audio"
-
-                    return (
-                      <div
-                        key={idx}
-                        className={`flex items-center justify-between p-3.5 rounded-xl border transition-all duration-200 ${
-                          isDone
-                            ? "bg-green-500/10 border-green-500/30"
-                            : "bg-muted/40 hover:bg-muted/70 border-border"
-                        }`}
-                      >
-                        <div className="flex items-center gap-3 min-w-0">
-                          {isAudio ? (
-                            <div className="p-2 rounded-lg bg-purple-500/10 text-purple-400 shrink-0">
-                              <Music className="h-4 w-4" />
-                            </div>
-                          ) : (
-                            <div className="p-2 rounded-lg bg-blue-500/10 text-blue-400 shrink-0">
-                              <Video className="h-4 w-4" />
-                            </div>
-                          )}
-                          <div className="min-w-0">
-                            <p className="text-xs font-semibold truncate">{fmt.label}</p>
-                            <p className="text-[10px] text-muted-foreground uppercase">
-                              {fmt.extension.toUpperCase()} • Saves to Downloads folder
-                            </p>
-                          </div>
-                        </div>
-
-                        <Button
-                          size="sm"
-                          disabled={isBusy}
-                          onClick={() => triggerDownload(fmt)}
-                          className={`gap-1.5 text-xs shrink-0 font-semibold ml-3 ${
-                            isDone ? "bg-green-600 hover:bg-green-700" : ""
-                          }`}
-                        >
-                          {isBusy ? (
-                            <>
-                              <Loader2 className="h-3.5 w-3.5 animate-spin" /> Saving...
-                            </>
-                          ) : isDone ? (
-                            <>
-                              <CheckCircle className="h-3.5 w-3.5" /> Saved!
-                            </>
-                          ) : (
-                            <>
-                              <Download className="h-3.5 w-3.5" />{" "}
-                              {isAudio ? "Save MP3" : "Save MP4"}
-                            </>
-                          )}
-                        </Button>
-                      </div>
-                    )
-                  })}
+                <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                  <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase ${getPlatformStyle(meta.platform).bg} ${getPlatformStyle(meta.platform).color} ${getPlatformStyle(meta.platform).border} border`}>
+                    {meta.platform}
+                  </span>
+                  {meta.duration && (
+                    <span className="flex items-center gap-1 bg-muted px-2 py-1 rounded-full">
+                      <Clock className="h-3 w-3" /> {meta.duration}
+                    </span>
+                  )}
+                  {meta.viewCount && (
+                    <span className="flex items-center gap-1 bg-muted px-2 py-1 rounded-full">
+                      <Eye className="h-3 w-3" /> {formatViewCount(meta.viewCount)}
+                    </span>
+                  )}
                 </div>
 
-                {/* Direct link fallback */}
-                {meta.formats.length > 0 && (
-                  <div className="pt-1">
-                    <button
-                      onClick={() => {
-                        window.open(meta.formats[0].url, "_blank", "noopener,noreferrer")
-                      }}
-                      className="flex items-center gap-1.5 text-[11px] text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      <ExternalLink className="h-3 w-3" />
-                      Open stream directly in browser
-                    </button>
+                {meta.uploader && (
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <User className="h-3.5 w-3.5" />
+                    {meta.uploaderUrl ? (
+                      <a href={meta.uploaderUrl} target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors underline underline-offset-2">
+                        {meta.uploader}
+                      </a>
+                    ) : (
+                      <span>{meta.uploader}</span>
+                    )}
                   </div>
                 )}
+
+                {/* ── Format Selector ── */}
+                <div className="space-y-2 pt-1">
+                  {/* Video formats */}
+                  {videoFormats.length > 0 && (
+                    <div className="space-y-1.5">
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5">
+                        <Video className="h-3 w-3" /> Video Formats
+                      </p>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                        {videoFormats.map((fmt) => (
+                          <label
+                            key={fmt.id}
+                            className={`flex items-center gap-2.5 p-2.5 rounded-lg border cursor-pointer transition-all duration-150 text-xs ${
+                              selectedFormat === fmt.id
+                                ? "bg-primary/10 border-primary/40 ring-1 ring-primary/30"
+                                : "bg-muted/30 border-border hover:bg-muted/60"
+                            }`}
+                          >
+                            <input
+                              type="radio"
+                              name="format"
+                              value={fmt.id}
+                              checked={selectedFormat === fmt.id}
+                              onChange={() => setSelectedFormat(fmt.id)}
+                              className="accent-primary h-3.5 w-3.5"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <p className="font-semibold truncate">
+                                {fmt.isBest ? "🏆 " : ""}{fmt.label}
+                              </p>
+                              <p className="text-[10px] text-muted-foreground">
+                                {fmt.ext.toUpperCase()}
+                                {fmt.filesizeLabel && ` • ~${fmt.filesizeLabel}`}
+                              </p>
+                            </div>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Audio formats */}
+                  {audioFormats.length > 0 && (
+                    <div className="space-y-1.5">
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5">
+                        <Music className="h-3 w-3" /> Audio Formats
+                      </p>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                        {audioFormats.map((fmt) => (
+                          <label
+                            key={fmt.id}
+                            className={`flex items-center gap-2.5 p-2.5 rounded-lg border cursor-pointer transition-all duration-150 text-xs ${
+                              selectedFormat === fmt.id
+                                ? "bg-purple-500/10 border-purple-500/40 ring-1 ring-purple-500/30"
+                                : "bg-muted/30 border-border hover:bg-muted/60"
+                            }`}
+                          >
+                            <input
+                              type="radio"
+                              name="format"
+                              value={fmt.id}
+                              checked={selectedFormat === fmt.id}
+                              onChange={() => setSelectedFormat(fmt.id)}
+                              className="accent-purple-500 h-3.5 w-3.5"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <p className="font-semibold truncate">
+                                {fmt.isBest ? "🎵 " : ""}{fmt.label}
+                              </p>
+                              <p className="text-[10px] text-muted-foreground">
+                                {fmt.needsConversion ? "MP3" : fmt.ext.toUpperCase()}
+                                {fmt.filesizeLabel && ` • ~${fmt.filesizeLabel}`}
+                              </p>
+                            </div>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
-            {/* Security notice */}
+            {/* ── Download Button ── */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+              <Button
+                onClick={triggerDownload}
+                disabled={!selectedFormat || !!downloadingId}
+                className={`h-12 px-8 gap-2.5 text-sm font-bold flex-1 sm:flex-none ${
+                  downloadSuccess
+                    ? "bg-green-600 hover:bg-green-700"
+                    : ""
+                }`}
+              >
+                {downloadingId ? (
+                  <><Loader2 className="h-4 w-4 animate-spin" /> Downloading & Converting...</>
+                ) : downloadSuccess ? (
+                  <><CheckCircle className="h-4 w-4" /> Downloaded Successfully!</>
+                ) : (
+                  <><Download className="h-4 w-4" /> Download Selected Format</>
+                )}
+              </Button>
+
+              {meta.formats.length > 0 && (
+                <button
+                  onClick={() => window.open(meta.originalUrl, "_blank", "noopener,noreferrer")}
+                  className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors h-12 px-4"
+                >
+                  <ExternalLink className="h-3.5 w-3.5" /> Open original
+                </button>
+              )}
+            </div>
+
+            {/* Info banner */}
             <div className="flex items-center gap-2 p-3 rounded-lg bg-green-500/10 border border-green-500/20 text-xs text-green-500">
               <ShieldCheck className="h-4 w-4 shrink-0" />
-              <span>
-                Downloads are proxied through our server for reliability. No data is stored — files stream directly to your device.
-              </span>
+              <span>Processed by yt-dlp + ffmpeg. File downloads directly to your device.</span>
             </div>
           </CardContent>
         </Card>
@@ -572,16 +556,12 @@ export default function VideoDownloaderPage() {
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                <Clock className="h-4 w-4 text-muted-foreground" />
-                Recent Downloads
+                <Clock className="h-4 w-4 text-muted-foreground" /> Recent Downloads
               </CardTitle>
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => {
-                  clearHistory()
-                  setHistory([])
-                }}
+                onClick={() => { clearHistory(); setHistory([]) }}
                 className="h-7 text-xs text-muted-foreground hover:text-red-400"
               >
                 <Trash2 className="h-3 w-3 mr-1" /> Clear
@@ -591,19 +571,17 @@ export default function VideoDownloaderPage() {
           <CardContent>
             <div className="space-y-1.5">
               {history.map((item, idx) => (
-                <div
-                  key={idx}
-                  className="flex items-center gap-3 p-2 rounded-lg text-xs bg-muted/30"
-                >
+                <div key={idx} className="flex items-center gap-3 p-2 rounded-lg text-xs bg-muted/30">
                   {item.type === "audio" ? (
                     <Music className="h-3.5 w-3.5 text-purple-400 shrink-0" />
                   ) : (
                     <Video className="h-3.5 w-3.5 text-blue-400 shrink-0" />
                   )}
                   <span className="truncate flex-1 font-medium">{item.title}</span>
-                  <span
-                    className={`text-[10px] px-1.5 py-0.5 rounded-full ${getPlatformStyle(item.platform).bg} ${getPlatformStyle(item.platform).color}`}
-                  >
+                  <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                    <HardDrive className="h-2.5 w-2.5" /> {item.quality}
+                  </span>
+                  <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${getPlatformStyle(item.platform).bg} ${getPlatformStyle(item.platform).color}`}>
                     {item.platform}
                   </span>
                   <span className="text-muted-foreground text-[10px] shrink-0">

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getVideoInfo } from "@/lib/cobalt"
 
-export const runtime = "edge" // Use edge runtime for faster cold starts
+const BACKEND_URL = process.env.YT_DLP_BACKEND_URL || "http://localhost:3001"
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,20 +14,30 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Basic URL validation
-    try {
-      new URL(url)
-    } catch {
+    // Proxy to yt-dlp backend
+    const res = await fetch(`${BACKEND_URL}/api/info`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url }),
+      signal: AbortSignal.timeout(35000),
+    })
+
+    const data = await res.json()
+    return NextResponse.json(data, { status: res.status })
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Backend unavailable"
+
+    // Check if it's a timeout or connection error
+    if (message.includes("fetch failed") || message.includes("ECONNREFUSED")) {
       return NextResponse.json(
-        { status: "error", error: "Invalid URL format. Please paste a valid video link." },
-        { status: 400 }
+        {
+          status: "error",
+          error: "Video extraction backend is currently offline. Please try again later.",
+        },
+        { status: 503 }
       )
     }
 
-    const metadata = await getVideoInfo(url)
-    return NextResponse.json(metadata)
-  } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Internal server error"
     return NextResponse.json(
       { status: "error", error: message },
       { status: 500 }

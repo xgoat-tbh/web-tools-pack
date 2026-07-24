@@ -135,7 +135,22 @@ export default function VideoDownloaderPage() {
 
   useEffect(() => { setHistory(getHistory()) }, [])
 
-  // ── URL Validation ──
+  // ── URL Cleaning & Validation ──
+  const cleanInputUrl = useCallback((raw: string): string => {
+    if (!raw) return ""
+    let trimmed = raw.trim()
+    const matches = trimmed.match(/https?:\/\/[^\s]+/g)
+    if (matches && matches.length > 0) {
+      let first = matches[0]
+      const secondIdx = first.indexOf("http", 8)
+      if (secondIdx > 0) {
+        first = first.substring(0, secondIdx)
+      }
+      return first
+    }
+    return trimmed
+  }, [])
+
   const isValidUrl = useCallback((value: string): boolean => {
     try {
       const parsed = new URL(value.trim())
@@ -145,10 +160,11 @@ export default function VideoDownloaderPage() {
 
   // ── Fetch Video Info ──
   const fetchInfo = useCallback(async (inputUrl?: string) => {
-    const target = (inputUrl || url).trim()
+    const target = cleanInputUrl(inputUrl || url)
     if (!target) { setError("Please paste a video link"); return }
     if (!isValidUrl(target)) { setError("Invalid URL — make sure it starts with https://"); return }
 
+    setUrl(target)
     setPhase("analyzing")
     setError(null)
     setMeta(null)
@@ -177,16 +193,18 @@ export default function VideoDownloaderPage() {
       setError("Failed to connect to the extraction server. Please try again.")
       setPhase("error")
     }
-  }, [url, isValidUrl])
+  }, [url, isValidUrl, cleanInputUrl])
 
   // ── Auto-detect pasted URL ──
   const handlePaste = useCallback((e: React.ClipboardEvent<HTMLInputElement>) => {
-    const pasted = e.clipboardData.getData("text").trim()
-    if (isValidUrl(pasted)) {
-      setUrl(pasted)
-      setTimeout(() => fetchInfo(pasted), 100)
+    const rawPasted = e.clipboardData.getData("text")
+    const cleaned = cleanInputUrl(rawPasted)
+    if (isValidUrl(cleaned)) {
+      e.preventDefault()
+      setUrl(cleaned)
+      setTimeout(() => fetchInfo(cleaned), 100)
     }
-  }, [fetchInfo, isValidUrl])
+  }, [fetchInfo, isValidUrl, cleanInputUrl])
 
   // ── Download handler ──
   const triggerDownload = useCallback(async () => {

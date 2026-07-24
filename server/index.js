@@ -28,7 +28,36 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
+// ── Fallback Cobalt Endpoints ──
+const COBALT_ENDPOINTS = [
+  "https://api.cobalt.tools/api/json",
+  "https://co.wuk.sh/api/json",
+  "https://cobalt.api.scotty.rip/api/json",
+  "https://co.eepy.today/api/json",
+];
+
 // ── Helpers ──
+
+/**
+ * Clean mangled or double-pasted URLs
+ */
+function cleanUrlInput(rawUrl) {
+  if (!rawUrl || typeof rawUrl !== "string") return "";
+  let trimmed = rawUrl.trim();
+
+  // Handle double paste e.g. "https://youtu.be/123https://youtu.be/123"
+  const httpMatches = trimmed.match(/https?:\/\/[^\s]+/g);
+  if (httpMatches && httpMatches.length > 0) {
+    let first = httpMatches[0];
+    // If first match contains another embedded "http", split it
+    const secondHttpIdx = first.indexOf("http", 8);
+    if (secondHttpIdx > 0) {
+      first = first.substring(0, secondHttpIdx);
+    }
+    return first;
+  }
+  return trimmed;
+}
 
 /**
  * Run yt-dlp with given args and return parsed JSON stdout.
@@ -94,6 +123,89 @@ function detectPlatform(url) {
 }
 
 /**
+ * Fallback to Cobalt API when yt-dlp encounters bot protection
+ */
+async function fallbackCobaltInfo(url) {
+  const platform = detectPlatform(url);
+  for (const endpoint of COBALT_ENDPOINTS) {
+    try {
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          url,
+          downloadMode: "auto",
+          vQuality: "1080",
+        }),
+        signal: AbortSignal.timeout(8000),
+      });
+
+      if (!res.ok) continue;
+      const data = await res.json();
+
+      const mediaUrl = data.url || (data.picker && data.picker[0]?.url);
+      if (!mediaUrl) continue;
+
+      // Extract YouTube ID if possible for thumbnail & title enrichment
+      let title = `${platform} Video`;
+      let thumbnail = null;
+      const ytMatch = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|shorts\/))([\w-]{11})/);
+      if (ytMatch) {
+        thumbnail = `https://img.youtube.com/vi/${ytMatch[1]}/maxresdefault.jpg`;
+        try {
+          const oembedRes = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${ytMatch[1]}&format=json`);
+          if (oembedRes.ok) {
+            const oembed = await oembedRes.json();
+            if (oembed.title) title = oembed.title;
+          }
+        } catch {}
+      }
+
+      return {
+        status: "success",
+        platform,
+        title,
+        thumbnail,
+        duration: null,
+        durationSeconds: null,
+        uploader: null,
+        uploaderUrl: null,
+        viewCount: null,
+        uploadDate: null,
+        formats: [
+          {
+            id: "cobalt-video",
+            label: "Best Quality (Video + Audio)",
+            qualityLabel: "Best",
+            type: "video",
+            ext: "mp4",
+            directUrl: mediaUrl,
+            isBest: true,
+          },
+          {
+            id: "cobalt-audio",
+            label: "Best Audio (MP3)",
+            qualityLabel: "Best",
+            type: "audio",
+            ext: "mp3",
+            directUrl: mediaUrl,
+            isBest: true,
+            needsConversion: true,
+          },
+        ],
+        originalUrl: url,
+      };
+    } catch {
+      continue;
+    }
+  }
+  return null;
+}
+
+/**
  * Build a clean format list from yt-dlp JSON output.
  * Deduplicates and sorts by quality.
  */
@@ -101,18 +213,14 @@ function buildFormatList(info) {
   const formats = [];
   const seen = new Set();
 
-  // yt-dlp "formats" array contains individual streams
   if (info.formats && Array.isArray(info.formats)) {
     for (const f of info.formats) {
-      // Skip format-only entries without URLs
       if (!f.url && !f.manifest_url) continue;
-      // Skip storyboard/mhtml formats
       if (f.ext === "mhtml" || f.protocol === "mhtml") continue;
 
       const hasVideo = f.vcodec && f.vcodec !== "none";
       const hasAudio = f.acodec && f.acodec !== "none";
 
-      // We want combined (video+audio) formats and audio-only formats
       if (hasVideo && hasAudio) {
         const height = f.height || 0;
         const label = `${height}p`;
@@ -153,7 +261,6 @@ function buildFormatList(info) {
     }
   }
 
-  // Sort: videos by height descending, audio by bitrate descending
   const videoFormats = formats
     .filter((f) => f.type === "video")
     .sort((a, b) => (b.height || 0) - (a.height || 0));
@@ -162,7 +269,6 @@ function buildFormatList(info) {
     .filter((f) => f.type === "audio")
     .sort((a, b) => (b.abr || 0) - (a.abr || 0));
 
-  // Always add "Best Video" and "Best Audio" convenience options at the top
   const result = [];
 
   result.push({
@@ -190,7 +296,6 @@ function buildFormatList(info) {
     needsConversion: true,
   });
 
-  // Add specific quality options (skip duplicates of best)
   for (const vf of videoFormats.slice(0, 5)) {
     result.push(vf);
   }
@@ -208,19 +313,22 @@ function buildFormatList(info) {
  * Extract video metadata + available formats
  */
 app.post("/api/info", async (req, res) => {
-  const { url } = req.body;
+  const rawUrl = req.body.url;
+  const url = cleanUrlInput(rawUrl);
 
   if (!url || typeof url !== "string") {
     return res.status(400).json({ status: "error", error: "Missing or invalid URL" });
   }
 
   try {
+    // Passes extractor args to bypass YouTube bot / sign-in check
     const stdout = await runYtDlp([
       "--dump-json",
       "--no-download",
       "--no-warnings",
       "--no-playlist",
       "--flat-playlist",
+      "--extractor-args", "youtube:player_client=mweb,android,web",
       url,
     ]);
 
@@ -243,10 +351,19 @@ app.post("/api/info", async (req, res) => {
       originalUrl: info.webpage_url || url,
     });
   } catch (err) {
-    console.error("[/api/info] Error:", err.message);
+    console.warn("[/api/info] yt-dlp error:", err.message, "— attempting Cobalt fallback...");
+
+    // Try Cobalt fallback for bot-detected URLs or extractor errors
+    const fallback = await fallbackCobaltInfo(url);
+    if (fallback) {
+      return res.json(fallback);
+    }
+
     res.status(422).json({
       status: "error",
-      error: err.message.includes("ERROR:")
+      error: err.message.includes("Sign in to confirm") || err.message.includes("bot")
+        ? "YouTube is requesting bot verification for this video. Please try again in a few moments or try another link."
+        : err.message.includes("ERROR:")
         ? err.message.replace(/ERROR:\s*/g, "")
         : "Failed to extract video information. The URL may be invalid, private, or unsupported.",
     });
@@ -258,44 +375,61 @@ app.post("/api/info", async (req, res) => {
  * Stream the video/audio file to the client
  */
 app.get("/api/download", async (req, res) => {
-  const { url, format, filename } = req.query;
+  const { url: rawUrl, format, filename, directUrl } = req.query;
+  const url = cleanUrlInput(rawUrl);
 
-  if (!url) {
+  if (!url && !directUrl) {
     return res.status(400).json({ status: "error", error: "Missing url parameter" });
+  }
+
+  // If a direct media URL was provided by Cobalt fallback
+  if (directUrl) {
+    try {
+      const upstream = await fetch(directUrl, {
+        headers: {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+        },
+      });
+      if (upstream.ok) {
+        const contentType = upstream.headers.get("Content-Type") || "application/octet-stream";
+        res.setHeader("Content-Type", contentType);
+        res.setHeader("Content-Disposition", `attachment; filename="${encodeURIComponent(filename || "download.mp4")}"`);
+        const arrayBuffer = await upstream.arrayBuffer();
+        return res.send(Buffer.from(arrayBuffer));
+      }
+    } catch (e) {
+      console.error("Direct fallback download failed:", e);
+    }
   }
 
   const formatId = format || "bv*+ba/b";
   const outputFilename = filename || "download.mp4";
-  const isAudioConversion = formatId === "ba" || formatId === "bestaudio";
+  const isAudioConversion = formatId === "ba" || formatId === "bestaudio" || formatId === "cobalt-audio";
 
   try {
-    // Build yt-dlp args
     const args = [
-      "-f", formatId,
+      "-f", formatId === "cobalt-video" || formatId === "cobalt-audio" ? "b/bv*+ba" : formatId,
       "--no-playlist",
       "--no-warnings",
-      "-o", "-", // Output to stdout
+      "--extractor-args", "youtube:player_client=mweb,android,web",
+      "-o", "-",
     ];
 
-    // If audio conversion to MP3, use yt-dlp's built-in postprocessor
     if (isAudioConversion) {
-      // For audio, we pipe yt-dlp → ffmpeg → response
-      args.splice(args.indexOf("-o"), 2); // Remove -o -
+      args.splice(args.indexOf("-o"), 2);
       args.push("--extract-audio");
       args.push("--audio-format", "mp3");
-      args.push("--audio-quality", "0"); // Best quality
+      args.push("--audio-quality", "0");
       args.push("-o", "-");
     }
 
     args.push(url);
 
-    // Set response headers
     const contentType = isAudioConversion ? "audio/mpeg" : "video/mp4";
     res.setHeader("Content-Type", contentType);
     res.setHeader("Content-Disposition", `attachment; filename="${encodeURIComponent(outputFilename)}"`);
     res.setHeader("Cache-Control", "no-cache");
 
-    // Spawn yt-dlp and pipe to response
     const proc = spawn("yt-dlp", args, {
       env: { ...process.env, PYTHONIOENCODING: "utf-8" },
     });
@@ -304,7 +438,6 @@ app.get("/api/download", async (req, res) => {
 
     proc.stderr.on("data", (data) => {
       const msg = data.toString();
-      // Only log actual errors, not progress
       if (msg.includes("ERROR:")) {
         console.error("[/api/download] yt-dlp stderr:", msg);
       }
@@ -323,7 +456,6 @@ app.get("/api/download", async (req, res) => {
       }
     });
 
-    // If client disconnects, kill the process
     req.on("close", () => {
       if (!proc.killed) {
         proc.kill("SIGTERM");
@@ -339,7 +471,6 @@ app.get("/api/download", async (req, res) => {
 
 /**
  * GET /health
- * Health check endpoint
  */
 app.get("/health", async (req, res) => {
   try {

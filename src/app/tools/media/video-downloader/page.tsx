@@ -10,9 +10,33 @@ import { Video, Download, Music, ShieldCheck, Sparkles, AlertCircle, Loader2, Pl
 
 const currentTool = allTools.find((t) => t.slug === "video-downloader")!
 
+const COBALT_ENDPOINTS = [
+  "https://co.wuk.sh/api/json",
+  "https://api.cobalt.tools/api/json",
+  "https://cobalt.api.scotty.rip/api/json",
+]
+
 function extractYouTubeId(url: string): string | null {
-  const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/)
+  const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/))([\w-]{11})/)
   return match ? match[1] : null
+}
+
+function cleanAndNormalizeUrl(rawUrl: string): string {
+  let u = rawUrl.trim()
+  const ytId = extractYouTubeId(u)
+  if (ytId) {
+    return `https://www.youtube.com/watch?v=${ytId}`
+  }
+  if (u.includes("instagram.com")) {
+    return u.split("?")[0]
+  }
+  if (u.includes("tiktok.com")) {
+    return u.split("?")[0]
+  }
+  if (u.includes("x.com/")) {
+    return u.replace("x.com/", "twitter.com/").split("?")[0]
+  }
+  return u
 }
 
 function detectPlatform(url: string): { name: string; color: string } {
@@ -26,12 +50,41 @@ function detectPlatform(url: string): { name: string; color: string } {
   return { name: "Universal Media", color: "text-primary" }
 }
 
+async function fetchFromCobalt(url: string, downloadMode: "auto" | "audio" = "auto") {
+  const cleanUrl = cleanAndNormalizeUrl(url)
+  
+  for (const endpoint of COBALT_ENDPOINTS) {
+    try {
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Accept": "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          url: cleanUrl,
+          downloadMode: downloadMode,
+          vQuality: "1080",
+        }),
+      })
+      if (res.ok) {
+        const data = await res.json()
+        if (data.url || (data.picker && data.picker.length > 0)) {
+          return data
+        }
+      }
+    } catch {
+      // try next endpoint
+    }
+  }
+  return null
+}
+
 interface FormatOption {
   label: string
   extension: string
   type: "video" | "audio"
   mode?: "audio" | "auto"
-  directUrl?: string
 }
 
 export default function VideoDownloaderPage() {
@@ -54,29 +107,17 @@ export default function VideoDownloaderPage() {
     setError(null)
     setHasSearched(true)
 
-    const ytId = extractYouTubeId(url.trim())
+    const cleanUrl = cleanAndNormalizeUrl(url)
+    const ytId = extractYouTubeId(cleanUrl)
     setYoutubeId(ytId)
-    const platformInfo = detectPlatform(url.trim())
+    const platformInfo = detectPlatform(cleanUrl)
     setPlatform(platformInfo.name)
 
     try {
-      // Fetch direct video stream info via Cobalt API
-      const res = await fetch("https://co.wuk.sh/api/json", {
-        method: "POST",
-        headers: {
-          "Accept": "application/json",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          url: url.trim(),
-          vQuality: "1080",
-        }),
-      })
-
-      const data = await res.json()
-      if (data.url) {
+      const data = await fetchFromCobalt(cleanUrl, "auto")
+      if (data?.url) {
         setDirectStreamUrl(data.url)
-      } else if (data.picker && data.picker.length > 0) {
+      } else if (data?.picker && data.picker.length > 0) {
         setDirectStreamUrl(data.picker[0].url)
       } else {
         setDirectStreamUrl(null)
@@ -88,60 +129,69 @@ export default function VideoDownloaderPage() {
     }
   }
 
-  // Real browser file download directly to user's computer/desktop
+  // Robust download trigger
   const triggerDownload = async (format: FormatOption) => {
     setDownloadingFormat(format.label)
-    try {
-      let finalDownloadUrl = format.directUrl || directStreamUrl
+    setError(null)
 
-      // If no direct URL cached, query Cobalt API dynamically for audio/video stream
-      if (!finalDownloadUrl) {
-        const res = await fetch("https://co.wuk.sh/api/json", {
-          method: "POST",
-          headers: {
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            url: url.trim(),
-            downloadMode: format.type === "audio" ? "audio" : "auto",
-            vQuality: "1080",
-          }),
-        })
-        const data = await res.json()
-        if (data.url) {
-          finalDownloadUrl = data.url
+    try {
+      const cleanUrl = cleanAndNormalizeUrl(url)
+      const mode = format.type === "audio" ? "audio" : "auto"
+      const data = await fetchFromCobalt(cleanUrl, mode)
+
+      const downloadUrl = data?.url || (data?.picker && data.picker[0]?.url) || directStreamUrl
+      const fileName = `${platform.toLowerCase().replace(/\s+/g, "_")}_${format.type}.${format.extension}`
+
+      if (downloadUrl) {
+        // Attempt Blob download first for seamless native file save dialog
+        try {
+          const fetchRes = await fetch(downloadUrl)
+          if (!fetchRes.ok) throw new Error("Blob fetch error")
+          const blob = await fetchRes.blob()
+          const blobUrl = URL.createObjectURL(blob)
+          const a = document.createElement("a")
+          a.href = blobUrl
+          a.download = fileName
+          document.body.appendChild(a)
+          a.click()
+          document.body.removeChild(a)
+          URL.revokeObjectURL(blobUrl)
+          return
+        } catch {
+          // Fallback: direct window anchor trigger without throwing error
+          const a = document.createElement("a")
+          a.href = downloadUrl
+          a.download = fileName
+          a.target = "_blank"
+          a.rel = "noopener noreferrer"
+          document.body.appendChild(a)
+          a.click()
+          document.body.removeChild(a)
+          return
         }
       }
 
-      const targetUrl = finalDownloadUrl || url
-      const fileName = `${platform.toLowerCase().replace(/\s+/g, "_")}_download.${format.extension}`
-
-      // Attempt blob fetch for direct native file save dialog
-      try {
-        const fetchRes = await fetch(targetUrl)
-        const blob = await fetchRes.blob()
-        const blobUrl = URL.createObjectURL(blob)
+      // Fallback for YouTube videos via Invidious stream mirror
+      const ytId = youtubeId || extractYouTubeId(url)
+      if (ytId) {
+        const fallbackUrl = format.type === "audio" 
+          ? `https://yewtu.be/latest_version?id=${ytId}&italic=true`
+          : `https://yewtu.be/latest_version?id=${ytId}&itag=22`
+        
         const a = document.createElement("a")
-        a.href = blobUrl
-        a.download = fileName
-        document.body.appendChild(a)
-        a.click()
-        document.body.removeChild(a)
-        URL.revokeObjectURL(blobUrl)
-      } catch {
-        // Fallback: force direct browser link trigger with download attribute
-        const a = document.createElement("a")
-        a.href = targetUrl
+        a.href = fallbackUrl
         a.download = fileName
         a.target = "_blank"
         a.rel = "noopener noreferrer"
         document.body.appendChild(a)
         a.click()
         document.body.removeChild(a)
+        return
       }
+
+      throw new Error("Could not fetch direct video stream. Please check the URL.")
     } catch (err: any) {
-      setError("Download request failed. Please check the URL and try again.")
+      setError(err.message || "Download request failed. Please check the URL and try again.")
     } finally {
       setDownloadingFormat(null)
     }
@@ -163,21 +213,21 @@ export default function VideoDownloaderPage() {
           Universal Video & Audio Downloader
         </h1>
         <p className="text-sm text-muted-foreground">
-          Paste any video link to preview in real-time and save MP4 or MP3 directly to your desktop.
+          Supports share links, YouTube Shorts, Reels, TikTok, Twitter/X, and direct media URLs.
         </p>
       </div>
 
       {/* URL Input Card */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base font-semibold">Paste Video URL</CardTitle>
+          <CardTitle className="text-base font-semibold">Paste Video / Share Link</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-col sm:flex-row gap-3">
             <Input
               value={url}
               onChange={(e) => setUrl(e.target.value)}
-              placeholder="e.g. https://youtu.be/qzQPoJctePA or Instagram Reel / TikTok link"
+              placeholder="Paste any link (e.g. https://youtu.be/... or Instagram Reel / TikTok share link)"
               className="flex-1 h-12 text-sm"
               onKeyDown={(e) => e.key === "Enter" && handleFetchInfo()}
             />
@@ -208,8 +258,8 @@ export default function VideoDownloaderPage() {
           {/* Platform badges */}
           <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground pt-1">
             <span className="font-semibold text-foreground">Supported:</span>
-            <span className="rounded bg-muted px-2 py-0.5 text-red-400">YouTube</span>
-            <span className="rounded bg-muted px-2 py-0.5 text-pink-400">Instagram</span>
+            <span className="rounded bg-muted px-2 py-0.5 text-red-400">YouTube & Shorts</span>
+            <span className="rounded bg-muted px-2 py-0.5 text-pink-400">Instagram Reels & Posts</span>
             <span className="rounded bg-muted px-2 py-0.5 text-cyan-400">TikTok</span>
             <span className="rounded bg-muted px-2 py-0.5 text-blue-400">Twitter / X</span>
             <span className="rounded bg-muted px-2 py-0.5 text-blue-600">Facebook</span>

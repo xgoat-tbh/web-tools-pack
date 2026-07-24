@@ -43,6 +43,7 @@ interface VideoFormat {
   filesizeLabel?: string | null
   isBest?: boolean
   needsConversion?: boolean
+  directUrl?: string
 }
 
 interface VideoMeta {
@@ -222,7 +223,8 @@ export default function VideoDownloaderPage() {
     const filename = `${safeTitle}.${ext}`
 
     try {
-      const proxyUrl = `/api/video/download?url=${encodeURIComponent(meta.originalUrl)}&format=${encodeURIComponent(fmt.id)}&filename=${encodeURIComponent(filename)}`
+      const directParam = fmt.directUrl ? `&directUrl=${encodeURIComponent(fmt.directUrl)}` : ""
+      const proxyUrl = `/api/video/download?url=${encodeURIComponent(meta.originalUrl)}&format=${encodeURIComponent(fmt.id)}&filename=${encodeURIComponent(filename)}${directParam}`
       const res = await fetch(proxyUrl)
 
       if (!res.ok) {

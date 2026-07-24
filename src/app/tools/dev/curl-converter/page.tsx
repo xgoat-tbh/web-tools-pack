@@ -48,7 +48,7 @@ function parseCurl(curlCmd: string): ParsedCurl {
   }
 
   // extract body (-d, --data, --data-raw)
-  const bodyMatch = clean.match(/(?:-d|--data|--data-raw)\s+["'](.*?)["'](?:\s+|$)/s) ||
+  const bodyMatch = clean.match(/(?:-d|--data|--data-raw)\s+["']([\s\S]*?)["'](?:\s+|$)/) ||
                     clean.match(/(?:-d|--data|--data-raw)\s+([^\s]+)/)
   if (bodyMatch) {
     body = bodyMatch[1]

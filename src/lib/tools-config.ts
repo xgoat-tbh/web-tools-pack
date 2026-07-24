@@ -6,7 +6,7 @@ import {
   Timer, StickyNote, Type, PenTool, CheckSquare,
   Laugh, Terminal, DollarSign, Ruler,
   Paintbrush, Square, Keyboard, Coins, Languages,
-  Mouse, Monitor, Zap, Wifi, Network, FileCode,
+  Mouse, Monitor, Zap, Wifi, Network, FileCode, Video,
 } from "lucide-react"
 
 export interface Tool {
@@ -78,6 +78,7 @@ export const categories: Category[] = [
     name: "Media & Files",
     slug: "media",
     tools: [
+      { name: "Universal Video Downloader", slug: "video-downloader", description: "Download videos & audio from YouTube, Instagram, TikTok & Twitter", icon: Video, category: "media", keywords: ["video downloader", "youtube download", "instagram reel", "tiktok", "mp4", "mp3"] },
       { name: "Image Compressor", slug: "image-compressor", description: "Compress images in-browser", icon: Image, category: "media", keywords: ["compress", "image", "png", "jpg", "webp"] },
       { name: "Image Resizer", slug: "image-resizer", description: "Resize images", icon: Maximize, category: "media", keywords: ["resize", "dimensions", "width", "height"] },
       { name: "Image Converter", slug: "image-converter", description: "Convert PNG/JPG/WebP", icon: FileImage, category: "media", keywords: ["convert", "png", "jpg", "webp"] },

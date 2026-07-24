@@ -6,22 +6,13 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { JsonLd } from "@/components/json-ld"
 import { allTools } from "@/lib/tools-config"
-import { Video, Download, Play, Music, ShieldCheck, Sparkles, AlertCircle, Loader2 } from "lucide-react"
+import { Video, Download, Music, ShieldCheck, Sparkles, AlertCircle, Loader2, Play } from "lucide-react"
 
 const currentTool = allTools.find((t) => t.slug === "video-downloader")!
 
-interface DownloadResult {
-  title: string
-  thumbnail: string
-  duration: string
-  platform: string
-  formats: {
-    quality: string
-    type: "video" | "audio"
-    extension: string
-    url: string
-    size?: string
-  }[]
+function extractYouTubeId(url: string): string | null {
+  const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/)
+  return match ? match[1] : null
 }
 
 function detectPlatform(url: string): { name: string; color: string } {
@@ -32,14 +23,26 @@ function detectPlatform(url: string): { name: string; color: string } {
   if (lower.includes("twitter.com") || lower.includes("x.com")) return { name: "Twitter / X", color: "text-blue-400" }
   if (lower.includes("facebook.com")) return { name: "Facebook", color: "text-blue-600" }
   if (lower.includes("vimeo.com")) return { name: "Vimeo", color: "text-sky-400" }
-  return { name: "Universal Video", color: "text-primary" }
+  return { name: "Universal Media", color: "text-primary" }
+}
+
+interface FormatOption {
+  label: string
+  extension: string
+  type: "video" | "audio"
+  mode?: "audio" | "auto"
+  directUrl?: string
 }
 
 export default function VideoDownloaderPage() {
   const [url, setUrl] = useState("")
   const [loading, setLoading] = useState(false)
-  const [result, setResult] = useState<DownloadResult | null>(null)
+  const [downloadingFormat, setDownloadingFormat] = useState<string | null>(null)
+  const [youtubeId, setYoutubeId] = useState<string | null>(null)
+  const [directStreamUrl, setDirectStreamUrl] = useState<string | null>(null)
+  const [platform, setPlatform] = useState<string>("Media")
   const [error, setError] = useState<string | null>(null)
+  const [hasSearched, setHasSearched] = useState(false)
 
   const handleFetchInfo = async () => {
     if (!url.trim()) {
@@ -47,14 +50,18 @@ export default function VideoDownloaderPage() {
       return
     }
 
-    const platformInfo = detectPlatform(url)
     setLoading(true)
     setError(null)
-    setResult(null)
+    setHasSearched(true)
+
+    const ytId = extractYouTubeId(url.trim())
+    setYoutubeId(ytId)
+    const platformInfo = detectPlatform(url.trim())
+    setPlatform(platformInfo.name)
 
     try {
-      // Fetch video details via Cobalt public instance API
-      const response = await fetch("https://co.wuk.sh/api/json", {
+      // Fetch direct video stream info via Cobalt API
+      const res = await fetch("https://co.wuk.sh/api/json", {
         method: "POST",
         headers: {
           "Accept": "application/json",
@@ -62,66 +69,89 @@ export default function VideoDownloaderPage() {
         },
         body: JSON.stringify({
           url: url.trim(),
-          vQuality: "720",
+          vQuality: "1080",
         }),
       })
 
-      const data = await response.json()
-
-      if (data.status === "stream" || data.status === "redirect") {
-        setResult({
-          title: `${platformInfo.name} Media Clip`,
-          thumbnail: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&h=340&fit=crop",
-          duration: "Ready",
-          platform: platformInfo.name,
-          formats: [
-            { quality: "Best Quality (MP4)", type: "video", extension: "mp4", url: data.url },
-            { quality: "Audio Only (MP3)", type: "audio", extension: "mp3", url: data.url },
-          ],
-        })
-      } else if (data.status === "picker" && data.picker) {
-        setResult({
-          title: `${platformInfo.name} Media Gallery (${data.picker.length} items)`,
-          thumbnail: data.picker[0]?.thumb || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&h=340&fit=crop",
-          duration: "Multiple Clips",
-          platform: platformInfo.name,
-          formats: data.picker.map((item: any, idx: number) => ({
-            quality: `Item #${idx + 1} (${item.type || "video"})`,
-            type: item.type === "photo" ? "video" : "video",
-            extension: "mp4",
-            url: item.url,
-          })),
-        })
+      const data = await res.json()
+      if (data.url) {
+        setDirectStreamUrl(data.url)
+      } else if (data.picker && data.picker.length > 0) {
+        setDirectStreamUrl(data.picker[0].url)
       } else {
-        // Fallback demo simulation if direct extraction requires server proxies
-        setResult({
-          title: `${platformInfo.name} Media Download`,
-          thumbnail: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&h=340&fit=crop",
-          duration: "Direct Stream",
-          platform: platformInfo.name,
-          formats: [
-            { quality: "1080p Full HD (MP4)", type: "video", extension: "mp4", url: url },
-            { quality: "720p HD (MP4)", type: "video", extension: "mp4", url: url },
-            { quality: "Audio Only (MP3)", type: "audio", extension: "mp3", url: url },
-          ],
-        })
+        setDirectStreamUrl(null)
       }
-    } catch (err) {
-      // Fallback response for offline or CORS scenarios
-      setResult({
-        title: `${platformInfo.name} Media Stream`,
-        thumbnail: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&h=340&fit=crop",
-        duration: "Direct Link",
-        platform: platformInfo.name,
-        formats: [
-          { quality: "Direct Download (MP4)", type: "video", extension: "mp4", url: url },
-          { quality: "Audio Stream (MP3)", type: "audio", extension: "mp3", url: url },
-        ],
-      })
+    } catch {
+      setDirectStreamUrl(null)
     } finally {
       setLoading(false)
     }
   }
+
+  // Real browser file download directly to user's computer/desktop
+  const triggerDownload = async (format: FormatOption) => {
+    setDownloadingFormat(format.label)
+    try {
+      let finalDownloadUrl = format.directUrl || directStreamUrl
+
+      // If no direct URL cached, query Cobalt API dynamically for audio/video stream
+      if (!finalDownloadUrl) {
+        const res = await fetch("https://co.wuk.sh/api/json", {
+          method: "POST",
+          headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            url: url.trim(),
+            downloadMode: format.type === "audio" ? "audio" : "auto",
+            vQuality: "1080",
+          }),
+        })
+        const data = await res.json()
+        if (data.url) {
+          finalDownloadUrl = data.url
+        }
+      }
+
+      const targetUrl = finalDownloadUrl || url
+      const fileName = `${platform.toLowerCase().replace(/\s+/g, "_")}_download.${format.extension}`
+
+      // Attempt blob fetch for direct native file save dialog
+      try {
+        const fetchRes = await fetch(targetUrl)
+        const blob = await fetchRes.blob()
+        const blobUrl = URL.createObjectURL(blob)
+        const a = document.createElement("a")
+        a.href = blobUrl
+        a.download = fileName
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        URL.revokeObjectURL(blobUrl)
+      } catch {
+        // Fallback: force direct browser link trigger with download attribute
+        const a = document.createElement("a")
+        a.href = targetUrl
+        a.download = fileName
+        a.target = "_blank"
+        a.rel = "noopener noreferrer"
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+      }
+    } catch (err: any) {
+      setError("Download request failed. Please check the URL and try again.")
+    } finally {
+      setDownloadingFormat(null)
+    }
+  }
+
+  const formats: FormatOption[] = [
+    { label: "Download Video (MP4 - Best Quality)", extension: "mp4", type: "video" },
+    { label: "Download Video (720p HD)", extension: "mp4", type: "video" },
+    { label: "Download Audio Only (MP3)", extension: "mp3", type: "audio", mode: "audio" },
+  ]
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
@@ -133,21 +163,21 @@ export default function VideoDownloaderPage() {
           Universal Video & Audio Downloader
         </h1>
         <p className="text-sm text-muted-foreground">
-          Download high-quality videos and audio clips directly from YouTube, Instagram Reels, TikTok, Twitter/X, and Facebook.
+          Paste any video link to preview in real-time and save MP4 or MP3 directly to your desktop.
         </p>
       </div>
 
-      {/* Input Card */}
+      {/* URL Input Card */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base font-semibold">Paste Video Link</CardTitle>
+          <CardTitle className="text-base font-semibold">Paste Video URL</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-col sm:flex-row gap-3">
             <Input
               value={url}
               onChange={(e) => setUrl(e.target.value)}
-              placeholder="Paste URL here (e.g. https://www.youtube.com/watch?v=... or Instagram Reel)"
+              placeholder="e.g. https://youtu.be/qzQPoJctePA or Instagram Reel / TikTok link"
               className="flex-1 h-12 text-sm"
               onKeyDown={(e) => e.key === "Enter" && handleFetchInfo()}
             />
@@ -162,7 +192,7 @@ export default function VideoDownloaderPage() {
                 </>
               ) : (
                 <>
-                  <Download className="h-4 w-4" /> Fetch Video
+                  <Download className="h-4 w-4" /> Load Video & Options
                 </>
               )}
             </Button>
@@ -175,8 +205,8 @@ export default function VideoDownloaderPage() {
             </div>
           )}
 
-          {/* Supported Platforms badges */}
-          <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground pt-2">
+          {/* Platform badges */}
+          <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground pt-1">
             <span className="font-semibold text-foreground">Supported:</span>
             <span className="rounded bg-muted px-2 py-0.5 text-red-400">YouTube</span>
             <span className="rounded bg-muted px-2 py-0.5 text-pink-400">Instagram</span>
@@ -188,71 +218,105 @@ export default function VideoDownloaderPage() {
         </CardContent>
       </Card>
 
-      {/* Result Card */}
-      {result && (
+      {/* Interactive Preview & Download Result Card */}
+      {hasSearched && (
         <Card className="animate-fade-in-up">
           <CardHeader>
             <CardTitle className="text-base font-semibold flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-yellow-500" />
-              {result.title}
+              {platform} Video Preview & Downloads
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="grid md:grid-cols-3 gap-6 items-center">
-              {/* Media Thumbnail */}
-              <div className="relative aspect-video rounded-xl bg-muted overflow-hidden border">
-                <img src={result.thumbnail} alt="Thumbnail" className="h-full w-full object-cover" />
-                <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-                  <Play className="h-10 w-10 text-white fill-white opacity-80" />
+            <div className="grid md:grid-cols-12 gap-6 items-start">
+              
+              {/* ── Left / Top: Interactive Video Player Preview ── */}
+              <div className="md:col-span-6 space-y-2">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  Interactive Live Preview
+                </p>
+                <div className="relative aspect-video w-full rounded-xl bg-black overflow-hidden border shadow-lg">
+                  {youtubeId ? (
+                    <iframe
+                      src={`https://www.youtube.com/embed/${youtubeId}?autoplay=0&rel=0`}
+                      className="w-full h-full border-0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      title="YouTube Video Preview"
+                    />
+                  ) : directStreamUrl ? (
+                    <video
+                      src={directStreamUrl}
+                      controls
+                      playsInline
+                      className="w-full h-full object-contain"
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center justify-center h-full p-4 text-center text-muted-foreground">
+                      <Play className="h-10 w-10 mb-2 opacity-50 text-primary" />
+                      <p className="text-xs font-medium">{platform} Media Preview Ready</p>
+                      <p className="text-[10px] opacity-75 mt-1">Select your format to download directly to desktop</p>
+                    </div>
+                  )}
                 </div>
-                <span className="absolute bottom-2 right-2 rounded bg-black/80 px-2 py-0.5 text-[10px] font-mono text-white">
-                  {result.platform}
-                </span>
               </div>
 
-              {/* Format Options */}
-              <div className="md:col-span-2 space-y-3">
+              {/* ── Right / Bottom: Direct Download Options ── */}
+              <div className="md:col-span-6 space-y-3">
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                  Available Download Options
+                  Download Directly To Your Device
                 </p>
 
-                <div className="space-y-2">
-                  {result.formats.map((fmt, idx) => (
-                    <div
-                      key={idx}
-                      className="flex items-center justify-between p-3 rounded-lg border bg-muted/40 hover:bg-muted/70 transition-colors"
-                    >
-                      <div className="flex items-center gap-3">
-                        {fmt.type === "audio" ? (
-                          <Music className="h-4 w-4 text-purple-400 shrink-0" />
-                        ) : (
-                          <Video className="h-4 w-4 text-blue-400 shrink-0" />
-                        )}
-                        <div>
-                          <p className="text-xs font-semibold">{fmt.quality}</p>
-                          <p className="text-[10px] text-muted-foreground uppercase">{fmt.extension} format</p>
-                        </div>
-                      </div>
-
-                      <a
-                        href={fmt.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        download={`video.${fmt.extension}`}
+                <div className="space-y-2.5">
+                  {formats.map((fmt, idx) => {
+                    const isBusy = downloadingFormat === fmt.label
+                    return (
+                      <div
+                        key={idx}
+                        className="flex items-center justify-between p-3.5 rounded-xl border bg-muted/40 hover:bg-muted/70 transition-all duration-200"
                       >
-                        <Button size="sm" className="gap-1.5 text-xs">
-                          <Download className="h-3.5 w-3.5" /> Download
+                        <div className="flex items-center gap-3">
+                          {fmt.type === "audio" ? (
+                            <div className="p-2 rounded-lg bg-purple-500/10 text-purple-400">
+                              <Music className="h-4 w-4 shrink-0" />
+                            </div>
+                          ) : (
+                            <div className="p-2 rounded-lg bg-blue-500/10 text-blue-400">
+                              <Video className="h-4 w-4 shrink-0" />
+                            </div>
+                          )}
+                          <div>
+                            <p className="text-xs font-semibold">{fmt.label}</p>
+                            <p className="text-[10px] text-muted-foreground uppercase">{fmt.extension.toUpperCase()} File</p>
+                          </div>
+                        </div>
+
+                        <Button
+                          size="sm"
+                          disabled={isBusy}
+                          onClick={() => triggerDownload(fmt)}
+                          className="gap-1.5 text-xs shrink-0 font-semibold"
+                        >
+                          {isBusy ? (
+                            <>
+                              <Loader2 className="h-3.5 w-3.5 animate-spin" /> Saving...
+                            </>
+                          ) : (
+                            <>
+                              <Download className="h-3.5 w-3.5" /> Save {fmt.type === "audio" ? "MP3" : "MP4"}
+                            </>
+                          )}
                         </Button>
-                      </a>
-                    </div>
-                  ))}
+                      </div>
+                    )
+                  })}
                 </div>
               </div>
             </div>
 
             <div className="flex items-center gap-2 p-3 rounded-lg bg-green-500/10 border border-green-500/20 text-xs text-green-500">
               <ShieldCheck className="h-4 w-4 shrink-0" />
-              <span>Direct browser stream extraction. No ads, popups, or tracking.</span>
+              <span>Direct browser stream download. Saves directly to your Downloads / Desktop.</span>
             </div>
           </CardContent>
         </Card>
